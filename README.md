@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/rocksideio/rockside-sdk-go?status.svg)](https://godoc.org/github.com/rocksideio/rockside-sdk-go)
+
 # Rockside GO SDK
 
 Official Rockside SDK for GO applications.
