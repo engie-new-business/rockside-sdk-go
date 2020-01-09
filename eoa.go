@@ -9,8 +9,7 @@ type CreateEOAResponse struct {
 }
 
 func (e *EOAEndpoint) Create() (CreateEOAResponse, *http.Response, error) {
-
-	result := CreateEOAResponse{}
+	var result CreateEOAResponse
 
 	resp, err := e.client.post("ethereum/eoa", nil, &result)
 	if err != nil {
@@ -21,7 +20,6 @@ func (e *EOAEndpoint) Create() (CreateEOAResponse, *http.Response, error) {
 }
 
 func (e *EOAEndpoint) List() ([]string, *http.Response, error) {
-
 	var result []string
 
 	resp, err := e.client.get("ethereum/eoa", nil, &result)

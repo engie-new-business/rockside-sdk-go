@@ -1,62 +1,49 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/rocksideio/rockside-sdk-go"
+	"github.com/spf13/cobra"
 )
 
 var (
 	client         *rockside.Client
-	rocksideURL    string
-	rocksideAPIKey = os.Getenv("ROCKSIDE_API_KEY")
+	envRocksideAPIKey = os.Getenv("ROCKSIDE_API_KEY")
+
+	privateKeyFlag, rocksideURLFlag string
+	testnetFlag, verboseFlag bool
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&rocksideURL, "url", "https://api.rockside.io", "Rockside api URL")
+	rootCmd.PersistentFlags().StringVar(&rocksideURLFlag, "url", "https://api.rockside.io", "Rockside API URL")
+	rootCmd.PersistentFlags().BoolVar(&testnetFlag, "tesnet", true, "Use testnet (Ropsten) instead of mainnet")
+	rootCmd.PersistentFlags().BoolVar(&verboseFlag, "verbose", false, "Verbose Rockside client")
 
-	eoaCmd.AddCommand(listEOACmd, createEOACmd)
-
-	listIdentitiesCmd.PersistentFlags().StringVar(&network, "network", "", "Network")
-	listIdentitiesCmd.MarkPersistentFlagRequired("network")
-	createIdentitiesCmd.PersistentFlags().StringVar(&network, "network", "", "Network")
-	createIdentitiesCmd.MarkPersistentFlagRequired("network")
-	identitiesCmd.AddCommand(listIdentitiesCmd, createIdentitiesCmd)
-
-	deployBouncerProxyCmd.PersistentFlags().StringVar(&network, "network", "", "Network")
-	deployBouncerProxyCmd.MarkPersistentFlagRequired("network")
-	getNonceCmd.PersistentFlags().StringVar(&network, "network", "", "Network")
-	getNonceCmd.MarkPersistentFlagRequired("network")
-	signCmd.PersistentFlags().StringVar(&network, "network", "", "Network")
-	signCmd.MarkPersistentFlagRequired("network")
-	signCmd.PersistentFlags().StringVar(&privateKey, "privatekey", "", "privatekey")
+	signCmd.PersistentFlags().StringVar(&privateKeyFlag, "privatekey", "", "privatekey")
 	signCmd.MarkPersistentFlagRequired("privatekey")
-	relayCmd.PersistentFlags().StringVar(&network, "network", "", "Network")
-	relayCmd.MarkPersistentFlagRequired("network")
 	bouncerProxyCmd.AddCommand(deployBouncerProxyCmd, getNonceCmd, signCmd, relayCmd)
-
-	sentTxCmd.PersistentFlags().StringVar(&network, "network", "", "Network")
-	sentTxCmd.MarkPersistentFlagRequired("network")
 	transactionCmd.AddCommand(sentTxCmd)
+	eoaCmd.AddCommand(listEOACmd, createEOACmd)
+	identitiesCmd.AddCommand(listIdentitiesCmd, createIdentitiesCmd)
 
 	rootCmd.AddCommand(eoaCmd, identitiesCmd, bouncerProxyCmd, transactionCmd)
 
 	cobra.OnInitialize(func() {
 		var err error
-		client, err = rockside.New(rocksideURL)
+		client, err = rockside.NewClient(rocksideURLFlag, envRocksideAPIKey)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		if len(rocksideAPIKey) > 0 {
-			client.SetAPIKey(rocksideAPIKey)
-		} else {
-			log.Fatal(errors.New("You need to provide an API Key"))
+		if testnetFlag {
+			client.SetNetwork(rockside.Testnet)
 		}
+		client.SetNetwork(rockside.Mainnet)
 
+		if verboseFlag {
+			client.SetLogger(log.New(os.Stderr, "", 0))
+		}
 	})
 }
 

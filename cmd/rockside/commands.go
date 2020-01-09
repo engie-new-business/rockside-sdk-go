@@ -10,11 +10,6 @@ import (
 	"github.com/rocksideio/rockside-sdk-go"
 )
 
-var (
-	network    string
-	privateKey string
-)
-
 var rootCmd = &cobra.Command{
 	Short: "Rockside client",
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -31,6 +26,7 @@ var (
 
 	listEOACmd = &cobra.Command{
 		Use:   "list",
+		Aliases: []string{"ls"},
 		Short: "List EOA",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			eoaList, _, err := client.EOA.List()
@@ -64,16 +60,11 @@ var (
 
 	listIdentitiesCmd = &cobra.Command{
 		Use:     "list",
+		Aliases: []string{"ls"},
 		Short:   "List identities",
 		Example: "list identities ropsten",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			net, err := rockside.GetNetwork(network)
-			if err != nil {
-				return err
-			}
-
-			identitiesList, _, err := client.Identities.List(net)
+			identitiesList, _, err := client.Identities.List()
 			if err != nil {
 				return err
 			}
@@ -86,13 +77,7 @@ var (
 		Use:   "create",
 		Short: "Create an identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			net, err := rockside.GetNetwork(network)
-			if err != nil {
-				return err
-			}
-
-			identity, _, err := client.Identities.Create(net)
+			identity, _, err := client.Identities.Create()
 			if err != nil {
 				return err
 			}
@@ -115,14 +100,8 @@ var (
 			if len(args) < 1 {
 				return errors.New("You need to provide the public address of the account")
 			}
-			account := args[0]
 
-			net, err := rockside.GetNetwork(network)
-			if err != nil {
-				return err
-			}
-
-			bouncerproxy, _, err := client.Contracts.CreateBouncerProxy(account, net)
+			bouncerproxy, _, err := client.Contracts.CreateBouncerProxy(args[0])
 			if err != nil {
 				return err
 			}
@@ -141,12 +120,7 @@ var (
 			contractAddress := args[0]
 			accountAddress := args[1]
 
-			net, err := rockside.GetNetwork(network)
-			if err != nil {
-				return err
-			}
-
-			nonce, _, err := client.BouncerProxy.GetNonce(contractAddress, accountAddress, net)
+			nonce, _, err := client.BouncerProxy.GetNonce(contractAddress, accountAddress)
 			if err != nil {
 				return err
 			}
@@ -170,12 +144,7 @@ var (
 				return err
 			}
 
-			net, err := rockside.GetNetwork(network)
-			if err != nil {
-				return err
-			}
-
-			signResponse, err := client.BouncerProxy.SignTxParams(privateKey, net, contractAddress, tx.From, tx.To, tx.Value, tx.Data)
+			signResponse, err := client.BouncerProxy.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data)
 
 			if err != nil {
 				return err
@@ -201,12 +170,7 @@ var (
 				return err
 			}
 
-			net, err := rockside.GetNetwork(network)
-			if err != nil {
-				return err
-			}
-
-			relayResponse, _, err := client.BouncerProxy.Relay(contractAddress, *relayTx, net)
+			relayResponse, _, err := client.BouncerProxy.Relay(contractAddress, *relayTx)
 			if err != nil {
 				return err
 			}
@@ -237,12 +201,7 @@ var (
 				return err
 			}
 
-			net, err := rockside.GetNetwork(network)
-			if err != nil {
-				return err
-			}
-
-			txResponse, _, err := client.Transaction.Send(*tx, net)
+			txResponse, _, err := client.Transaction.Send(*tx)
 			if err != nil {
 				return err
 			}

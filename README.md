@@ -4,28 +4,29 @@
 
 Official Rockside SDK for GO applications.
 
-## Usage
+## Client Library Usage
 
-### Client library
+To use the client look at the [reference and examples](https://godoc.org/github.com/rocksideio/rockside-sdk-go) 
 
-```go
+## CLI Usage
 
-import "github.com/rocksideio/rockside-sdk-go"
+We provide a basic command line interface using the Rockside SDK GO, to interact with the Rockside API.
 
-...
-client, err := rockside.NewClient(apiKey)
-...
-```
-
-### Command Line Interface
-
-Install it with
+Install it with:
 
 ```sh
 go get github.com/rocksideio/rockside-sdk-go/cmd/rockside
 ```
 
-Then
+Display the various commands & flags available with:
+
 ```sh
 rockside -h
+```
+
+Then to use commands export your API key:
+
+```
+export ROCKSIDE_API_KEY=...
+rockside --tesnet --verbose identities ls
 ```

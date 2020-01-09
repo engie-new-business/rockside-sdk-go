@@ -35,10 +35,11 @@ type NonceResponse struct {
 	Nonce string `json:"nonce"`
 }
 
-func (b *BouncerProxyEndpoint) Relay(contractAddress string, request RelayTxRequest, network Network) (RelayTxResponse, *http.Response, error) {
-	result := RelayTxResponse{}
+func (b *BouncerProxyEndpoint) Relay(contractAddress string, request RelayTxRequest) (RelayTxResponse, *http.Response, error) {
+	var result RelayTxResponse
 
-	resp, err := b.client.post("ethereum/"+network.String()+"/contracts/bouncerproxy/"+contractAddress+"/relay", request, &result)
+	path := fmt.Sprintf("ethereum/%s/contracts/bouncerproxy/%s/relay", b.client.network, contractAddress)
+	resp, err := b.client.post(path, request, &result)
 	if err != nil {
 		return result, resp, err
 	}
@@ -46,12 +47,11 @@ func (b *BouncerProxyEndpoint) Relay(contractAddress string, request RelayTxRequ
 	return result, resp, nil
 }
 
-func (b *BouncerProxyEndpoint) GetNonce(contractAddress string, account string, network Network) (NonceResponse, *http.Response, error) {
-	result := NonceResponse{}
+func (b *BouncerProxyEndpoint) GetNonce(contractAddress string, account string) (NonceResponse, *http.Response, error) {
+	var result NonceResponse
 
-	request := nonceRequest{Account: account}
-
-	resp, err := b.client.post("ethereum/"+network.String()+"/contracts/bouncerproxy/"+contractAddress+"/nonce", request, &result)
+	path := fmt.Sprintf("ethereum/%s/contracts/bouncerproxy/%s/nonce", b.client.network, contractAddress)
+	resp, err := b.client.post(path, nonceRequest{Account: account}, &result)
 	if err != nil {
 		return result, resp, err
 	}
@@ -79,7 +79,7 @@ func getHash(bouncer, signer, destination common.Address, value *big.Int, data [
 	return crypto.Keccak256(packed), nil
 }
 
-func (b *BouncerProxyEndpoint) SignTxParams(privateKeyStr string, network Network, bouncerAddress string, signer string, destination string, value string, data string) (string, error) {
+func (b *BouncerProxyEndpoint) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
@@ -90,7 +90,7 @@ func (b *BouncerProxyEndpoint) SignTxParams(privateKeyStr string, network Networ
 		return "", errors.New("error with provided value")
 	}
 
-	nonceResponse, _, err := b.GetNonce(bouncerAddress, signer, network)
+	nonceResponse, _, err := b.GetNonce(bouncerAddress, signer)
 	if err != nil {
 		return "", err
 	}

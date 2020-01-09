@@ -7,16 +7,13 @@ import (
 
 func TestIdentities(t *testing.T) {
 
-	client, err := New(baseURL)
+	client, err := NewClient(baseURL, apikey)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	client.SetAPIKey(apikey)
-
 	t.Run("Create Identites on ropsten", func(t *testing.T) {
-
-		response, httpResponse, err := client.Identities.Create(Ropsten)
+		response, httpResponse, err := client.Identities.Create()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -28,11 +25,10 @@ func TestIdentities(t *testing.T) {
 		if got, want := len(response.Address), 42; got != want {
 			t.Fatalf("got %v, want %v", got, want)
 		}
-
 	})
 
 	t.Run("List Identities on ropsten", func(t *testing.T) {
-		listResponse, httpResponse, err := client.Identities.List(Ropsten)
+		listResponse, httpResponse, err := client.Identities.List()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,12 +42,12 @@ func TestIdentities(t *testing.T) {
 			t.Fatalf("expect response length %v greater than 0", initialNumberOfEOA)
 		}
 
-		createResponse, httpResponse, err := client.Identities.Create(Ropsten)
+		createResponse, httpResponse, err := client.Identities.Create()
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		listResponse, httpResponse, err = client.Identities.List(Ropsten)
+		listResponse, httpResponse, err = client.Identities.List()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -74,8 +70,7 @@ func TestIdentities(t *testing.T) {
 	})
 
 	t.Run("Create Identites on mainnet", func(t *testing.T) {
-
-		response, httpResponse, err := client.Identities.Create(Mainnet)
+		response, httpResponse, err := client.Identities.Create()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -87,6 +82,5 @@ func TestIdentities(t *testing.T) {
 		if got, want := len(response.Address), 42; got != want {
 			t.Fatalf("got %v, want %v", got, want)
 		}
-
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,13 +13,24 @@ import (
 	"net/url"
 )
 
+type Network string
+
+var (
+	Testnet Network = "ropsten"
+	Mainnet Network = "mainnet"
+)
+
+type endpoint struct {
+	client *Client
+}
+
 type Client struct {
-	client  *http.Client
 	baseURL *url.URL
+	apiKey string
+	network Network
 
+	client  *http.Client
 	logger *log.Logger
-
-	apikey string
 
 	EOA          *EOAEndpoint
 	Identities   *IdentitiesEndpoint
@@ -27,27 +39,24 @@ type Client struct {
 	BouncerProxy *BouncerProxyEndpoint
 }
 
-type endpoint struct {
-	client *Client
-}
-
-func (c *Client) SetAPIKey(apikey string) {
-	c.apikey = apikey
-}
-
-func (c *Client) SetLogger(l *log.Logger) {
-	c.logger = l
-}
-
-func New(baseURL string) (*Client, error) {
+func NewClient(baseURL, APIKey string) (*Client, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, err
+	}
+	if u.Scheme != "https" {
+		return nil, fmt.Errorf("init client: expected base URL with HTTPS scheme but got URL '%s'", baseURL)
+	}
+
+	if len(APIKey) != 32 {
+		return nil, fmt.Errorf("init client: expected length of API Key to be 32 but got %d", len(APIKey))
 	}
 
 	c := &Client{
 		client:  http.DefaultClient,
 		baseURL: u,
+		apiKey: APIKey,
+		network: Mainnet,
 		logger:  log.New(ioutil.Discard, "", 0),
 	}
 
@@ -58,6 +67,19 @@ func New(baseURL string) (*Client, error) {
 	c.BouncerProxy = &BouncerProxyEndpoint{c}
 
 	return c, nil
+}
+
+func (c *Client) SetLogger(l *log.Logger) {
+	c.logger = l
+}
+
+func (c *Client) SetNetwork(net Network) {
+	switch net {
+	case Mainnet, Testnet:
+		c.network = net
+	default:
+		panic(fmt.Sprintf("setting invalid network '%s' for client. Expecting: %s or %s", net, Mainnet, Testnet))
+	}
 }
 
 func (c *Client) get(urlPath string, body interface{}, decode interface{}) (*http.Response, error) {
@@ -95,12 +117,12 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "rockside-golang-client")
+	req.Header.Set("User-Agent", "rockside-go-client")
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	if tok := c.apikey; len(tok) > 0 {
+	if tok := c.apiKey; len(tok) > 0 {
 		req.Header.Set("apikey", tok)
 	}
 
@@ -117,11 +139,11 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	c.logger.Printf("<---- Response %s\n----\n\n", dump)
 
 	if status := resp.StatusCode; status > 299 || status < 200 {
-		if msg, err := DecodeJSONErr(resp.Body); err == nil {
-			return resp, errors.New(msg)
-		} else {
+		if msg, err := decodeJSONErr(resp.Body); err != nil {
 			c.logger.Printf("error body returned from '%s' does not seem to be JSON", resp.Request.URL)
 			return resp, err
+		} else {
+			return resp, errors.New(msg)
 		}
 	}
 
@@ -134,7 +156,7 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	return resp, nil
 }
 
-func DecodeJSONErr(body io.Reader) (string, error) {
+func decodeJSONErr(body io.Reader) (string, error) {
 	v := struct {
 		Err string `json:"error"`
 	}{}
@@ -142,12 +164,4 @@ func DecodeJSONErr(body io.Reader) (string, error) {
 		return "", err
 	}
 	return v.Err, nil
-}
-
-func MustDecodeJSONErr(body io.Reader) string {
-	msg, err := DecodeJSONErr(body)
-	if err != nil {
-		panic(err)
-	}
-	return msg
 }

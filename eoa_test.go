@@ -7,15 +7,12 @@ import (
 
 func TestEOA(t *testing.T) {
 
-	client, err := New(baseURL)
+	client, err := NewClient(baseURL, apikey)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	client.SetAPIKey(apikey)
-
 	t.Run("Create EOA", func(t *testing.T) {
-
 		response, httpResponse, err := client.EOA.Create()
 		if err != nil {
 			t.Fatal(err)
@@ -28,7 +25,6 @@ func TestEOA(t *testing.T) {
 		if got, want := len(response.Address), 42; got != want {
 			t.Fatalf("got %v, want %v", got, want)
 		}
-
 	})
 
 	t.Run("List EOA", func(t *testing.T) {
@@ -71,7 +67,5 @@ func TestEOA(t *testing.T) {
 		if !containsAddress {
 			t.Fatalf("should contains created address")
 		}
-
 	})
-
 }

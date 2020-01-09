@@ -9,15 +9,13 @@ import (
 
 func TestTransaction(t *testing.T) {
 
-	client, err := New(baseURL)
+	client, err := NewClient(baseURL, apikey)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	client.SetAPIKey(apikey)
-
 	t.Run("Send transaction with Identity is OK", func(t *testing.T) {
-		response, httpResponse, err := client.Identities.Create(Mainnet)
+		response, httpResponse, err := client.Identities.Create()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -31,7 +29,7 @@ func TestTransaction(t *testing.T) {
 		time.Sleep(time.Duration(blockDuration) * time.Second)
 
 		tx := Transaction{From: response.Address, To: response.Address, Value: "0x0"}
-		txResponse, httpResponse, err := client.Transaction.Send(tx, Mainnet)
+		txResponse, httpResponse, err := client.Transaction.Send(tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -43,7 +41,5 @@ func TestTransaction(t *testing.T) {
 		if got, want := len(txResponse.TransactionHash), 66; got != want {
 			t.Fatalf("got %v, want %v", got, want)
 		}
-
 	})
-
 }

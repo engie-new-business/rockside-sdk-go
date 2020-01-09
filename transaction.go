@@ -1,6 +1,9 @@
 package rockside
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type TransactionEndpoint endpoint
 
@@ -18,11 +21,11 @@ type SendTxResponse struct {
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (t *TransactionEndpoint) Send(transaction Transaction, network Network) (SendTxResponse, *http.Response, error) {
+func (t *TransactionEndpoint) Send(transaction Transaction) (SendTxResponse, *http.Response, error) {
+	var result SendTxResponse
 
-	result := SendTxResponse{}
-
-	resp, err := t.client.post("ethereum/"+network.String()+"/transaction", transaction, &result)
+	path := fmt.Sprintf("ethereum/%s/transaction", t.client.network)
+	resp, err := t.client.post(path, transaction, &result)
 	if err != nil {
 		return result, resp, err
 	}

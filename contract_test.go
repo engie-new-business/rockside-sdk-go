@@ -14,19 +14,16 @@ import (
 )
 
 var (
-	baseURL   = os.Getenv("BASE_URL")
-	apikey    = os.Getenv("APIKEY")
+	baseURL   = os.Getenv("ROCKSIDE_URL")
+	apikey    = os.Getenv("ROCKSIDE_API_KEY")
 	blockTime = os.Getenv("BLOCK_TIME")
 )
 
 func TestContract(t *testing.T) {
-
-	client, err := New(baseURL)
+	client, err := NewClient(baseURL, apikey)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	client.SetAPIKey(apikey)
 
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
@@ -46,7 +43,7 @@ func TestContract(t *testing.T) {
 
 	t.Run("Create Bouncer proxy", func(t *testing.T) {
 
-		bouncerResponse, httpResponse, err := client.Contracts.CreateBouncerProxy(fromAddress.String(), Mainnet)
+		bouncerResponse, httpResponse, err := client.Contracts.CreateBouncerProxy(fromAddress.String())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -69,7 +66,7 @@ func TestContract(t *testing.T) {
 
 		t.Run("Bouncer proxy get nonce", func(t *testing.T) {
 
-			response, httpResponse, err := client.BouncerProxy.GetNonce(bouncerResponse.BouncerProxyAddress, fromAddress.String(), Mainnet)
+			response, httpResponse, err := client.BouncerProxy.GetNonce(bouncerResponse.BouncerProxyAddress, fromAddress.String())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -84,7 +81,7 @@ func TestContract(t *testing.T) {
 		})
 
 		t.Run("Bouncer proxy relay transaction", func(t *testing.T) {
-			signature, err := client.BouncerProxy.SignTxParams(privateKeyString, Mainnet, bouncerResponse.BouncerProxyAddress, fromAddress.String(), fromAddress.String(), "0", "")
+			signature, err := client.BouncerProxy.SignTxParams(privateKeyString, bouncerResponse.BouncerProxyAddress, fromAddress.String(), fromAddress.String(), "0", "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -94,7 +91,7 @@ func TestContract(t *testing.T) {
 				To:        fromAddress.String(),
 				Signature: signature,
 			}
-			response, httpResponse, err := client.BouncerProxy.Relay(bouncerResponse.BouncerProxyAddress, request, Mainnet)
+			response, httpResponse, err := client.BouncerProxy.Relay(bouncerResponse.BouncerProxyAddress, request)
 			if err != nil {
 				t.Fatal(err)
 			}
