@@ -6,9 +6,8 @@ import (
 	"log"
 	"os"
 
-	"rockside/sdk-go"
-
 	"github.com/spf13/cobra"
+	"github.com/rocksideio/rockside-sdk-go"
 )
 
 var (

@@ -5,15 +5,14 @@ import (
 	"log"
 	"os"
 
-	"rockside/sdk-go"
-
 	"github.com/spf13/cobra"
+	"github.com/rocksideio/rockside-sdk-go"
 )
 
 var (
-	client      *rockside.Client
-	rocksideURL string
-	rocksideAPIKey  = os.Getenv("ROCKSIDE_API_KEY")
+	client         *rockside.Client
+	rocksideURL    string
+	rocksideAPIKey = os.Getenv("ROCKSIDE_API_KEY")
 )
 
 func init() {
