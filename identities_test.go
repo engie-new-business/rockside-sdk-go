@@ -12,7 +12,9 @@ func TestIdentities(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Run("Create Identites on ropsten", func(t *testing.T) {
+	client.SetNetwork(Testnet)
+
+	t.Run("Create Identites", func(t *testing.T) {
 		response, httpResponse, err := client.Identities.Create()
 		if err != nil {
 			t.Fatal(err)
@@ -27,7 +29,7 @@ func TestIdentities(t *testing.T) {
 		}
 	})
 
-	t.Run("List Identities on ropsten", func(t *testing.T) {
+	t.Run("List Identities", func(t *testing.T) {
 		listResponse, httpResponse, err := client.Identities.List()
 		if err != nil {
 			t.Fatal(err)
@@ -66,21 +68,6 @@ func TestIdentities(t *testing.T) {
 
 		if !containsAddress {
 			t.Fatalf("should contains created address")
-		}
-	})
-
-	t.Run("Create Identites on mainnet", func(t *testing.T) {
-		response, httpResponse, err := client.Identities.Create()
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if got, want := httpResponse.StatusCode, http.StatusCreated; got != want {
-			t.Fatalf("got %v, want %v", got, want)
-		}
-
-		if got, want := len(response.Address), 42; got != want {
-			t.Fatalf("got %v, want %v", got, want)
 		}
 	})
 }

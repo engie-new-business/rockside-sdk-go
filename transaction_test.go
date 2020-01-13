@@ -14,6 +14,8 @@ func TestTransaction(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	client.SetNetwork(Testnet)
+
 	t.Run("Send transaction with Identity is OK", func(t *testing.T) {
 		response, httpResponse, err := client.Identities.Create()
 		if err != nil {

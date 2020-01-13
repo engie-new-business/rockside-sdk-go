@@ -25,6 +25,8 @@ func TestContract(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	client.SetNetwork(Testnet)
+
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
 		log.Fatal(err)
