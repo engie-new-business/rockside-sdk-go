@@ -9,16 +9,16 @@ import (
 )
 
 var (
-	client         *rockside.Client
+	client            *rockside.Client
 	envRocksideAPIKey = os.Getenv("ROCKSIDE_API_KEY")
 
 	privateKeyFlag, rocksideURLFlag string
-	testnetFlag, verboseFlag bool
+	testnetFlag, verboseFlag        bool
 )
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&rocksideURLFlag, "url", "https://api.rockside.io", "Rockside API URL")
-	rootCmd.PersistentFlags().BoolVar(&testnetFlag, "tesnet", true, "Use testnet (Ropsten) instead of mainnet")
+	rootCmd.PersistentFlags().BoolVar(&testnetFlag, "testnet", true, "Use testnet (Ropsten) instead of mainnet")
 	rootCmd.PersistentFlags().BoolVar(&verboseFlag, "verbose", false, "Verbose Rockside client")
 
 	signCmd.PersistentFlags().StringVar(&privateKeyFlag, "privatekey", "", "privatekey")
