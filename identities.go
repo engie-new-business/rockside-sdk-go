@@ -8,7 +8,8 @@ import (
 type IdentitiesEndpoint endpoint
 
 type CreateIdentitiesResponse struct {
-	Address string `json:"address"`
+	Address         string `json:"address"`
+	TransactionHash string `json:"transaction_hash"`
 }
 
 func (i *IdentitiesEndpoint) Create() (CreateIdentitiesResponse, *http.Response, error) {

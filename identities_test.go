@@ -27,6 +27,9 @@ func TestIdentities(t *testing.T) {
 		if got, want := len(response.Address), 42; got != want {
 			t.Fatalf("got %v, want %v", got, want)
 		}
+		if got, want := len(response.TransactionHash), 66; got != want {
+			t.Fatalf("got %v, want %v", got, want)
+		}
 	})
 
 	t.Run("List Identities", func(t *testing.T) {
