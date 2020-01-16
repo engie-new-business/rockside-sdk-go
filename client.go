@@ -26,10 +26,10 @@ type endpoint struct {
 
 type Client struct {
 	baseURL *url.URL
-	apiKey string
+	apiKey  string
 	network Network
 
-	client  *http.Client
+	client *http.Client
 	logger *log.Logger
 
 	EOA          *EOAEndpoint
@@ -55,7 +55,7 @@ func NewClient(baseURL, APIKey string) (*Client, error) {
 	c := &Client{
 		client:  http.DefaultClient,
 		baseURL: u,
-		apiKey: APIKey,
+		apiKey:  APIKey,
 		network: Mainnet,
 		logger:  log.New(ioutil.Discard, "", 0),
 	}

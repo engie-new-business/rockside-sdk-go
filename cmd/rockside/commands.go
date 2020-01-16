@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"github.com/rocksideio/rockside-sdk-go"
 	"log"
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/rocksideio/rockside-sdk-go"
 )
 
 var rootCmd = &cobra.Command{
@@ -25,9 +25,9 @@ var (
 	}
 
 	listEOACmd = &cobra.Command{
-		Use:   "list",
+		Use:     "list",
 		Aliases: []string{"ls"},
-		Short: "List EOA",
+		Short:   "List EOA",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			eoaList, _, err := client.EOA.List()
 			if err != nil {

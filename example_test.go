@@ -2,7 +2,7 @@ package rockside_test
 
 import (
 	"fmt"
-	"github.com/rocksideio/rockside-sdk-go"
+	rockside "github.com/rocksideio/rockside-sdk-go"
 	"os"
 )
 
