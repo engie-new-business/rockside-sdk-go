@@ -1,9 +1,11 @@
 package rockside
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -40,25 +42,21 @@ func (t *TransactionEndpoint) Send(transaction Transaction) (SendTxResponse, *ht
 }
 
 func validateTransactionFields(t Transaction) error {
-	if err := validateHexField("from", t.From); err != nil {
-		return err
+	if !common.IsHexAddress(t.From) {
+		return errors.New("invalid 'from' address")
 	}
-	if err := validateHexField("to", t.To); err != nil {
-		return err
+	// To can be empty for contract creation
+	if t.To != "" && !common.IsHexAddress(t.To) {
+		return errors.New("invalid 'to' address")
 	}
-	if err := validateHexField("data", t.Data); err != nil {
-		return err
+	if len(t.Data) > 0 {
+		if _, err := hexutil.Decode(t.Data); err != nil {
+			return fmt.Errorf("invalid 'data' bytes: %w", err)
+		}
 	}
-	if err := validateHexField("value", t.Value); err != nil {
-		return err
-	}
-	return nil
-}
-
-func validateHexField(fieldName, hexVal string) error {
-	if len(hexVal) > 0 {
-		if _, err := hexutil.Decode(hexVal); err != nil {
-			return fmt.Errorf("invalid non empty '%s' field: %s", fieldName, err)
+	if len(t.Value) > 0 {
+		if _, err := hexutil.DecodeBig(t.Value); err != nil {
+			return fmt.Errorf("invalid 'value' number: %w", err)
 		}
 	}
 	return nil

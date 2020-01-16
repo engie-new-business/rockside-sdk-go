@@ -10,15 +10,16 @@ import (
 
 func TestValidateTransactionFields(t *testing.T) {
 	endpoint := new(TransactionEndpoint)
+	validAddress := "0x268ba693540A7176ae5d3ba9256A18efbe0A63FF"
 	tests := []struct {
 		tx          Transaction
 		errContains string
 	}{
-		{tx: Transaction{From: "123", To: ""}, errContains: "'from' field"},
-		{tx: Transaction{From: "", To: "34567898"}, errContains: "'to' field"},
-		{tx: Transaction{From: "1245", To: "34567898"}, errContains: "'from' field"},
-		{tx: Transaction{Data: "456a789"}, errContains: "'data' field"},
-		{tx: Transaction{Value: "456a789"}, errContains: "'value' field"},
+		{tx: Transaction{From: "123", To: ""}, errContains: "'from' address"},
+		{tx: Transaction{From: validAddress, To: "34567898"}, errContains: "'to' address"},
+		{tx: Transaction{From: "1245", To: "34567898"}, errContains: "'from' address"},
+		{tx: Transaction{From: validAddress, Data: "456a789"}, errContains: "'data' bytes"},
+		{tx: Transaction{From: validAddress, Value: "456a789"}, errContains: "'value' number"},
 	}
 
 	for i, test := range tests {

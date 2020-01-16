@@ -57,6 +57,9 @@ func TestContract(t *testing.T) {
 		if got, want := len(bouncerResponse.BouncerProxyAddress), 42; got != want {
 			t.Fatalf("got %v, want %v", got, want)
 		}
+		if got, want := len(bouncerResponse.TransactionHash), 66; got != want {
+			t.Fatalf("got %v, want %v", got, want)
+		}
 
 		blockDuration, err := strconv.Atoi(blockTime)
 		if err != nil {

@@ -13,6 +13,7 @@ type createBouncerProxyRequest struct {
 
 type CreateBouncerProxyResponse struct {
 	BouncerProxyAddress string `json:"bouncer_proxy_address"`
+	TransactionHash     string `json:"transaction_hash"`
 }
 
 func (c *ContractsEndpoint) CreateBouncerProxy(account string) (CreateBouncerProxyResponse, *http.Response, error) {
