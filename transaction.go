@@ -3,7 +3,6 @@ package rockside
 import (
 	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -25,20 +24,19 @@ type SendTxResponse struct {
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (t *TransactionEndpoint) Send(transaction Transaction) (SendTxResponse, *http.Response, error) {
+func (t *TransactionEndpoint) Send(transaction Transaction) (SendTxResponse, error) {
 	var result SendTxResponse
 
 	if err := validateTransactionFields(transaction); err != nil {
-		return result, nil, err
+		return result, err
 	}
 
 	path := fmt.Sprintf("ethereum/%s/transaction", t.client.network)
-	resp, err := t.client.post(path, transaction, &result)
-	if err != nil {
-		return result, resp, err
+	if _, err := t.client.post(path, transaction, &result); err != nil {
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }
 
 func validateTransactionFields(t Transaction) error {

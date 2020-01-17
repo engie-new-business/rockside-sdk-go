@@ -2,7 +2,6 @@ package rockside
 
 import (
 	"fmt"
-	"net/http"
 )
 
 type ContractsEndpoint endpoint
@@ -16,14 +15,13 @@ type CreateBouncerProxyResponse struct {
 	TransactionHash     string `json:"transaction_hash"`
 }
 
-func (c *ContractsEndpoint) CreateBouncerProxy(account string) (CreateBouncerProxyResponse, *http.Response, error) {
+func (c *ContractsEndpoint) CreateBouncerProxy(account string) (CreateBouncerProxyResponse, error) {
 	var result CreateBouncerProxyResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/bouncerproxy", c.client.network)
-	resp, err := c.client.post(path, createBouncerProxyRequest{Account: account}, &result)
-	if err != nil {
-		return result, resp, err
+	if _, err := c.client.post(path, createBouncerProxyRequest{Account: account}, &result); err != nil {
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }

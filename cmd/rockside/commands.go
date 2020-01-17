@@ -29,7 +29,7 @@ var (
 		Aliases: []string{"ls"},
 		Short:   "List EOA",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			eoaList, _, err := client.EOA.List()
+			eoaList, err := client.EOA.List()
 			if err != nil {
 				return err
 			}
@@ -42,7 +42,7 @@ var (
 		Use:   "create",
 		Short: "Create an EOA",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			eoa, _, err := client.EOA.Create()
+			eoa, err := client.EOA.Create()
 			if err != nil {
 				return err
 			}
@@ -64,7 +64,7 @@ var (
 		Short:   "List identities",
 		Example: "list identities ropsten",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			identitiesList, _, err := client.Identities.List()
+			identitiesList, err := client.Identities.List()
 			if err != nil {
 				return err
 			}
@@ -77,7 +77,7 @@ var (
 		Use:   "create",
 		Short: "Create an identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			identity, _, err := client.Identities.Create()
+			identity, err := client.Identities.Create()
 			if err != nil {
 				return err
 			}
@@ -101,7 +101,7 @@ var (
 				return errors.New("You need to provide the public address of the account")
 			}
 
-			bouncerproxy, _, err := client.Contracts.CreateBouncerProxy(args[0])
+			bouncerproxy, err := client.Contracts.CreateBouncerProxy(args[0])
 			if err != nil {
 				return err
 			}
@@ -120,7 +120,7 @@ var (
 			contractAddress := args[0]
 			accountAddress := args[1]
 
-			nonce, _, err := client.BouncerProxy.GetNonce(contractAddress, accountAddress)
+			nonce, err := client.BouncerProxy.GetNonce(contractAddress, accountAddress)
 			if err != nil {
 				return err
 			}
@@ -170,7 +170,7 @@ var (
 				return err
 			}
 
-			relayResponse, _, err := client.BouncerProxy.Relay(contractAddress, *relayTx)
+			relayResponse, err := client.BouncerProxy.Relay(contractAddress, *relayTx)
 			if err != nil {
 				return err
 			}
@@ -201,7 +201,7 @@ var (
 				return err
 			}
 
-			txResponse, _, err := client.Transaction.Send(*tx)
+			txResponse, err := client.Transaction.Send(*tx)
 			if err != nil {
 				return err
 			}

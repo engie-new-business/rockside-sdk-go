@@ -1,31 +1,27 @@
 package rockside
 
-import "net/http"
-
 type EOAEndpoint endpoint
 
 type CreateEOAResponse struct {
 	Address string `json:"address"`
 }
 
-func (e *EOAEndpoint) Create() (CreateEOAResponse, *http.Response, error) {
+func (e *EOAEndpoint) Create() (CreateEOAResponse, error) {
 	var result CreateEOAResponse
 
-	resp, err := e.client.post("ethereum/eoa", nil, &result)
-	if err != nil {
-		return result, resp, err
+	if _, err := e.client.post("ethereum/eoa", nil, &result); err != nil {
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }
 
-func (e *EOAEndpoint) List() ([]string, *http.Response, error) {
+func (e *EOAEndpoint) List() ([]string, error) {
 	var result []string
 
-	resp, err := e.client.get("ethereum/eoa", nil, &result)
-	if err != nil {
-		return result, resp, err
+	if _, err := e.client.get("ethereum/eoa", nil, &result); err != nil {
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }

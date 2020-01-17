@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"net/http"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -35,28 +34,27 @@ type NonceResponse struct {
 	Nonce string `json:"nonce"`
 }
 
-func (b *BouncerProxyEndpoint) Relay(contractAddress string, request RelayTxRequest) (RelayTxResponse, *http.Response, error) {
+func (b *BouncerProxyEndpoint) Relay(contractAddress string, request RelayTxRequest) (RelayTxResponse, error) {
 	var result RelayTxResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/bouncerproxy/%s/relay", b.client.network, contractAddress)
-	resp, err := b.client.post(path, request, &result)
-	if err != nil {
-		return result, resp, err
+	if _, err := b.client.post(path, request, &result); err != nil {
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }
 
-func (b *BouncerProxyEndpoint) GetNonce(contractAddress string, account string) (NonceResponse, *http.Response, error) {
+func (b *BouncerProxyEndpoint) GetNonce(contractAddress string, account string) (NonceResponse, error) {
 	var result NonceResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/bouncerproxy/%s/nonce", b.client.network, contractAddress)
-	resp, err := b.client.post(path, nonceRequest{Account: account}, &result)
+	_, err := b.client.post(path, nonceRequest{Account: account}, &result)
 	if err != nil {
-		return result, resp, err
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }
 
 func getHash(bouncer, signer, destination common.Address, value *big.Int, data []byte, nonce *big.Int) ([]byte, error) {
@@ -90,7 +88,7 @@ func (b *BouncerProxyEndpoint) SignTxParams(privateKeyStr string, bouncerAddress
 		return "", errors.New("error with provided value")
 	}
 
-	nonceResponse, _, err := b.GetNonce(bouncerAddress, signer)
+	nonceResponse, err := b.GetNonce(bouncerAddress, signer)
 	if err != nil {
 		return "", err
 	}

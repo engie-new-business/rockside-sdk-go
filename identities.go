@@ -2,7 +2,6 @@ package rockside
 
 import (
 	"fmt"
-	"net/http"
 )
 
 type IdentitiesEndpoint endpoint
@@ -12,26 +11,24 @@ type CreateIdentitiesResponse struct {
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (i *IdentitiesEndpoint) Create() (CreateIdentitiesResponse, *http.Response, error) {
+func (i *IdentitiesEndpoint) Create() (CreateIdentitiesResponse, error) {
 	var result CreateIdentitiesResponse
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
-	resp, err := i.client.post(path, nil, &result)
-	if err != nil {
-		return result, resp, err
+	if _, err := i.client.post(path, nil, &result); err != nil {
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }
 
-func (i *IdentitiesEndpoint) List() ([]string, *http.Response, error) {
+func (i *IdentitiesEndpoint) List() ([]string, error) {
 	var result []string
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
-	resp, err := i.client.get(path, nil, &result)
-	if err != nil {
-		return result, resp, err
+	if _, err := i.client.get(path, nil, &result); err != nil {
+		return result, err
 	}
 
-	return result, resp, nil
+	return result, nil
 }
