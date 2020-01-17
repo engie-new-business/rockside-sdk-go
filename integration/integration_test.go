@@ -24,35 +24,6 @@ var (
 	rocksideURL   = os.Getenv("ROCKSIDE_URL")
 )
 
-func exit(msg string) {
-	fmt.Fprintln(os.Stderr, msg)
-	os.Exit(1)
-}
-
-func init() {
-	if len(rocksideURL) == 0 {
-		exit("missing ROCKSIDE_URL env variable")
-	}
-
-	waitTime := os.Getenv("BLOCK_WAIT_TIME")
-	if waitTime == "" {
-		if strings.Contains(rocksideURL, "integration") {
-			waitTime = "6"
-		} else {
-			waitTime = "120"
-		}
-	}
-
-	int, err := strconv.Atoi(waitTime)
-	if err != nil {
-		exit("cannot parse block wait time as int")
-	}
-
-	blockWaitTime = int
-
-	fmt.Fprint(os.Stdout, fmt.Sprintf("Launching integration test on %s (block wait time %d)\n\n", rocksideURL, blockWaitTime))
-}
-
 func TestRockside(t *testing.T) {
 	client, err := rockside.NewClient(rocksideURL, os.Getenv("ROCKSIDE_API_KEY"))
 	if err != nil {
@@ -260,4 +231,33 @@ func TestRockside(t *testing.T) {
 			})
 		})
 	})
+}
+
+func exit(msg string) {
+	fmt.Fprintln(os.Stderr, msg)
+	os.Exit(1)
+}
+
+func init() {
+	if len(rocksideURL) == 0 {
+		exit("missing ROCKSIDE_URL env variable")
+	}
+
+	waitTime := os.Getenv("BLOCK_WAIT_TIME")
+	if waitTime == "" {
+		if strings.Contains(rocksideURL, "integration") {
+			waitTime = "6"
+		} else {
+			waitTime = "120"
+		}
+	}
+
+	int, err := strconv.Atoi(waitTime)
+	if err != nil {
+		exit("cannot parse block wait time as int")
+	}
+
+	blockWaitTime = int
+
+	fmt.Fprint(os.Stdout, fmt.Sprintf("Launching integration test on %s (block wait time %d)\n\n", rocksideURL, blockWaitTime))
 }

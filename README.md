@@ -8,15 +8,17 @@ Official Rockside SDK for GO applications.
 
 To use the client look at the [reference and examples](https://godoc.org/github.com/rocksideio/rockside-sdk-go) 
 
-## CLI Usage
+## Command Line Interface Usage
 
-We provide a basic command line interface using the Rockside SDK GO, to interact with the Rockside API.
+To interact with the Rockside API, deploy contracts, etc. we provide a CLI (that uses the Rockside SDK GO)
 
-Install it with:
+### Install 
 
-```sh
-go get github.com/rocksideio/rockside-sdk-go/cmd/rockside
-```
+Get the latest CLI binary for [macOS, Windows or Linux here](https://github.com/rocksideio/rockside-sdk-go/releases)!
+
+(... or if you have GO locally do: `go get github.com/rocksideio/rockside-sdk-go/cmd/rockside`)
+
+### Usage
 
 Display the various commands & flags available with:
 
@@ -29,4 +31,11 @@ Then to use commands export your API key:
 ```
 export ROCKSIDE_API_KEY=...
 rockside --tesnet --verbose identities ls
+```
+
+For instance you can deploy a contract with:
+
+```
+export ROCKSIDE_API_KEY=...
+./rockside --testnet deploy-contract /tmp/mycontract.sol
 ```

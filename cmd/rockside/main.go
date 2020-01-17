@@ -4,21 +4,25 @@ import (
 	"github.com/rocksideio/rockside-sdk-go"
 	"log"
 	"os"
-
-	"github.com/spf13/cobra"
 )
 
 var (
-	client            *rockside.Client
 	envRocksideAPIKey = os.Getenv("ROCKSIDE_API_KEY")
+	envRocksideAPIURL = os.Getenv("ROCKSIDE_API_URL")
 
-	privateKeyFlag, rocksideURLFlag string
-	testnetFlag, verboseFlag        bool
+	privateKeyFlag, rocksideURLFlag, identityToDeployContractFlag string
+	testnetFlag, verboseFlag                                      bool
+	printContractABIFlag, printContractRuntimeBinFlag             bool
+	compileContractOnlyFlag, printContractCreationBinFlag         bool
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&rocksideURLFlag, "url", "https://api.rockside.io", "Rockside API URL")
-	rootCmd.PersistentFlags().BoolVar(&testnetFlag, "testnet", true, "Use testnet (Ropsten) instead of mainnet")
+	if envRocksideAPIURL == "" {
+		envRocksideAPIURL = "https://api.rockside.io"
+	}
+
+	rootCmd.PersistentFlags().StringVar(&rocksideURLFlag, "url", envRocksideAPIURL, "Rockside API URL")
+	rootCmd.PersistentFlags().BoolVar(&testnetFlag, "testnet", false, "Use testnet (Ropsten) instead of mainnet")
 	rootCmd.PersistentFlags().BoolVar(&verboseFlag, "verbose", false, "Verbose Rockside client")
 
 	signCmd.PersistentFlags().StringVar(&privateKeyFlag, "privatekey", "", "privatekey")
@@ -28,23 +32,29 @@ func init() {
 	eoaCmd.AddCommand(listEOACmd, createEOACmd)
 	identitiesCmd.AddCommand(listIdentitiesCmd, createIdentitiesCmd)
 
-	rootCmd.AddCommand(eoaCmd, identitiesCmd, bouncerProxyCmd, transactionCmd)
+	deployContractCmd.PersistentFlags().StringVar(&identityToDeployContractFlag, "identity-address", "", "Address of Rockside identity to use as 'from' when deploying contract")
+	deployContractCmd.PersistentFlags().BoolVar(&printContractABIFlag, "print-abi", false, "Compile, print contract abi and exit")
+	deployContractCmd.PersistentFlags().BoolVar(&printContractRuntimeBinFlag, "print-runtime-bin", false, "Compile, print contract runtime bytecode and exit")
+	deployContractCmd.PersistentFlags().BoolVar(&printContractCreationBinFlag, "print-creation-bin", false, "Compile, print contract creation bytecode and exit")
+	deployContractCmd.PersistentFlags().BoolVar(&compileContractOnlyFlag, "compile-only", false, "Compile without deploying and exit")
 
-	cobra.OnInitialize(func() {
-		var err error
-		client, err = rockside.NewClient(rocksideURLFlag, envRocksideAPIKey)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if testnetFlag {
-			client.SetNetwork(rockside.Testnet)
-		}
+	rootCmd.AddCommand(eoaCmd, identitiesCmd, bouncerProxyCmd, transactionCmd, deployContractCmd)
+}
+
+func RocksideClient() *rockside.Client {
+	client, err := rockside.NewClient(rocksideURLFlag, envRocksideAPIKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if testnetFlag {
+		client.SetNetwork(rockside.Testnet)
+	} else {
 		client.SetNetwork(rockside.Mainnet)
-
-		if verboseFlag {
-			client.SetLogger(log.New(os.Stderr, "", 0))
-		}
-	})
+	}
+	if verboseFlag {
+		client.SetLogger(log.New(os.Stderr, "", 0))
+	}
+	return client
 }
 
 func main() {

@@ -3,7 +3,6 @@ package rockside
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,12 +12,21 @@ import (
 	"net/url"
 )
 
-type Network string
-
 var (
 	Testnet Network = "ropsten"
 	Mainnet Network = "mainnet"
 )
+
+type Network string
+
+func (n Network) EtherscanURL() string {
+	switch n {
+	case Testnet:
+		return fmt.Sprintf("https://%s.etherscan.io", n)
+	default:
+		return "https://etherscan.io"
+	}
+}
 
 type endpoint struct {
 	client *Client
@@ -48,8 +56,11 @@ func NewClient(baseURL, APIKey string) (*Client, error) {
 		return nil, fmt.Errorf("init client: expected base URL with HTTPS scheme but got URL '%s'", baseURL)
 	}
 
+	if len(APIKey) == 0 {
+		return nil, fmt.Errorf("init client: no API key found. Try with env variable ROCKSIDE_API_KEY")
+	}
 	if len(APIKey) != 32 {
-		return nil, fmt.Errorf("init client: expected length of API Key to be 32 but got %d", len(APIKey))
+		return nil, fmt.Errorf("init client: expected length of API key to be 32 but got %d", len(APIKey))
 	}
 
 	c := &Client{
@@ -80,6 +91,14 @@ func (c *Client) SetNetwork(net Network) {
 	default:
 		panic(fmt.Sprintf("setting invalid network '%s' for client. Expecting: %s or %s", net, Mainnet, Testnet))
 	}
+}
+
+func (c *Client) CurrentNetwork() Network {
+	return c.network
+}
+
+func (c *Client) URL() string {
+	return c.baseURL.String()
 }
 
 func (c *Client) get(urlPath string, body interface{}, decode interface{}) (*http.Response, error) {
@@ -127,7 +146,7 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	}
 
 	dump, _ := httputil.DumpRequestOut(req, true)
-	c.logger.Printf("----> Request %s----\n\n", dump)
+	c.logger.Printf(">>>>>> Request %s-----\n\n", dump)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -136,14 +155,14 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	defer resp.Body.Close()
 
 	dump, _ = httputil.DumpResponse(resp, true)
-	c.logger.Printf("<---- Response %s\n----\n\n", dump)
+	c.logger.Printf("<<<<<< Response %s\n-----\n\n", dump)
 
 	if status := resp.StatusCode; status > 299 || status < 200 {
 		if msg, err := decodeJSONErr(resp.Body); err != nil {
 			c.logger.Printf("error body returned from '%s' does not seem to be JSON", resp.Request.URL)
 			return resp, err
 		} else {
-			return resp, errors.New(msg)
+			return resp, fmt.Errorf("%s (network: %s, URL: %s)", msg, c.CurrentNetwork(), c.URL())
 		}
 	}
 
@@ -158,10 +177,14 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 
 func decodeJSONErr(body io.Reader) (string, error) {
 	v := struct {
-		Err string `json:"error"`
+		Err     string `json:"error"`
+		Message string `json:"message"`
 	}{}
 	if err := json.NewDecoder(body).Decode(&v); err != nil {
 		return "", err
 	}
-	return v.Err, nil
+	if v.Err != "" {
+		return v.Err, nil
+	}
+	return v.Message, nil
 }

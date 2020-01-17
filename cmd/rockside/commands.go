@@ -29,7 +29,7 @@ var (
 		Aliases: []string{"ls"},
 		Short:   "List EOA",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			eoaList, err := client.EOA.List()
+			eoaList, err := RocksideClient().EOA.List()
 			if err != nil {
 				return err
 			}
@@ -42,7 +42,7 @@ var (
 		Use:   "create",
 		Short: "Create an EOA",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			eoa, err := client.EOA.Create()
+			eoa, err := RocksideClient().EOA.Create()
 			if err != nil {
 				return err
 			}
@@ -64,7 +64,7 @@ var (
 		Short:   "List identities",
 		Example: "list identities ropsten",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			identitiesList, err := client.Identities.List()
+			identitiesList, err := RocksideClient().Identities.List()
 			if err != nil {
 				return err
 			}
@@ -77,7 +77,7 @@ var (
 		Use:   "create",
 		Short: "Create an identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			identity, err := client.Identities.Create()
+			identity, err := RocksideClient().Identities.Create()
 			if err != nil {
 				return err
 			}
@@ -101,7 +101,7 @@ var (
 				return errors.New("You need to provide the public address of the account")
 			}
 
-			bouncerproxy, err := client.Contracts.CreateBouncerProxy(args[0])
+			bouncerproxy, err := RocksideClient().Contracts.CreateBouncerProxy(args[0])
 			if err != nil {
 				return err
 			}
@@ -120,7 +120,7 @@ var (
 			contractAddress := args[0]
 			accountAddress := args[1]
 
-			nonce, err := client.BouncerProxy.GetNonce(contractAddress, accountAddress)
+			nonce, err := RocksideClient().BouncerProxy.GetNonce(contractAddress, accountAddress)
 			if err != nil {
 				return err
 			}
@@ -144,7 +144,7 @@ var (
 				return err
 			}
 
-			signResponse, err := client.BouncerProxy.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data)
+			signResponse, err := RocksideClient().BouncerProxy.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data)
 
 			if err != nil {
 				return err
@@ -170,7 +170,7 @@ var (
 				return err
 			}
 
-			relayResponse, err := client.BouncerProxy.Relay(contractAddress, *relayTx)
+			relayResponse, err := RocksideClient().BouncerProxy.Relay(contractAddress, *relayTx)
 			if err != nil {
 				return err
 			}
@@ -201,7 +201,7 @@ var (
 				return err
 			}
 
-			txResponse, err := client.Transaction.Send(*tx)
+			txResponse, err := RocksideClient().Transaction.Send(*tx)
 			if err != nil {
 				return err
 			}
