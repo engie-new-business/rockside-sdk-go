@@ -3,14 +3,14 @@ package rockside_test
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/rocksideio/rockside-sdk-go"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 /*
@@ -34,10 +34,10 @@ func init() {
 	}
 
 	waitTime := os.Getenv("BLOCK_WAIT_TIME")
-	if len(waitTime) == 0 {
+	if waitTime == "" {
 		if strings.Contains(rocksideURL, "integration") {
 			waitTime = "6"
-		} else if strings.Contains(rocksideURL, "staging") {
+		} else {
 			waitTime = "120"
 		}
 	}
