@@ -15,13 +15,13 @@ import (
 )
 
 /*
-Launch the integration tests with: ROCKSIDE_URL=... ROCKSIDE_API_KEY=... go test -v
+Launch the integration tests with: ROCKSIDE_API_URL=... ROCKSIDE_API_KEY=... go test -v
 (or using BLOCK_WAIT_TIME env variable for a specific block wait time)
 */
 
 var (
 	blockWaitTime int
-	rocksideURL   = os.Getenv("ROCKSIDE_URL")
+	rocksideURL   = os.Getenv("ROCKSIDE_API_URL")
 )
 
 func TestRockside(t *testing.T) {
