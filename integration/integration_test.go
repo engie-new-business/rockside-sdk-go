@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -243,13 +242,9 @@ func init() {
 		exit("missing ROCKSIDE_URL env variable")
 	}
 
-	waitTime := os.Getenv("BLOCK_WAIT_TIME")
-	if waitTime == "" {
-		if strings.Contains(rocksideURL, "integration") {
-			waitTime = "6"
-		} else {
-			waitTime = "120"
-		}
+	waitTime, exists := os.LookupEnv("BLOCK_WAIT_TIME")
+	if !exists {
+		waitTime = "120"
 	}
 
 	int, err := strconv.Atoi(waitTime)
