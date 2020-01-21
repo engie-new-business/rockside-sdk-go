@@ -1,9 +1,12 @@
 package rockside_test
 
 import (
+	"context"
 	"fmt"
-	"github.com/rocksideio/rockside-sdk-go"
 	"os"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/rocksideio/rockside-sdk-go"
 )
 
 var client *rockside.Client
@@ -20,6 +23,19 @@ func ExampleNewClient() {
 		panic(err)
 	}
 	fmt.Println(identities)
+}
+
+func ExampleNewRPCClient() {
+	rpc, err := rockside.NewRPCClient("https://api.rockside.io", os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
+	if err != nil {
+		panic(err)
+	}
+
+	balance, err := rpc.BalanceAt(context.Background(), common.Address{}, nil)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(balance)
 }
 
 func ExampleDeployContract() {
