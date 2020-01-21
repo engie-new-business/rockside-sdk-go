@@ -11,13 +11,13 @@ import (
 type TransactionEndpoint endpoint
 
 type Transaction struct {
-	From     string `json:"from"`
-	To       string `json:"to"`
-	Value    string `json:"value"`
-	Data     string `json:"data"`
-	Nonce    string `json:"nonce"`
-	Gas      string `json:"gas"`
-	GasPrice string `json:"gasprice"`
+	From     string `json:"from,omitempty"`
+	To       string `json:"to,omitempty"`
+	Value    string `json:"value,omitempty"`
+	Data     string `json:"data,omitempty"`
+	Nonce    string `json:"nonce,omitempty"`
+	Gas      string `json:"gas,omitempty"`
+	GasPrice string `json:"gasprice,omitempty"`
 }
 
 type SendTxResponse struct {
@@ -27,7 +27,7 @@ type SendTxResponse struct {
 func (t *TransactionEndpoint) Send(transaction Transaction) (SendTxResponse, error) {
 	var result SendTxResponse
 
-	if err := validateTransactionFields(transaction); err != nil {
+	if err := transaction.ValidateFields(); err != nil {
 		return result, err
 	}
 
@@ -39,7 +39,7 @@ func (t *TransactionEndpoint) Send(transaction Transaction) (SendTxResponse, err
 	return result, nil
 }
 
-func validateTransactionFields(t Transaction) error {
+func (t Transaction) ValidateFields() error {
 	if !common.IsHexAddress(t.From) {
 		return errors.New("invalid 'from' address")
 	}
