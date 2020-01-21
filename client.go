@@ -37,8 +37,9 @@ type Client struct {
 	apiKey  string
 	network Network
 
-	client *http.Client
-	logger *log.Logger
+	client    *http.Client
+	rpcClient *RPCClient
+	logger    *log.Logger
 
 	EOA          *EOAEndpoint
 	Identities   *IdentitiesEndpoint
@@ -47,7 +48,16 @@ type Client struct {
 	BouncerProxy *BouncerProxyEndpoint
 }
 
-func NewClient(baseURL, APIKey string) (*Client, error) {
+func NewClient(baseURL, APIKey string, net Network) (*Client, error) {
+	var network Network
+
+	switch net {
+	case Mainnet, Testnet:
+		network = net
+	default:
+		return nil, fmt.Errorf("init client: invalid network '%s' for client. Expecting: %s or %s", net, Mainnet, Testnet)
+	}
+
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, err
@@ -67,7 +77,7 @@ func NewClient(baseURL, APIKey string) (*Client, error) {
 		client:  http.DefaultClient,
 		baseURL: u,
 		apiKey:  APIKey,
-		network: Mainnet,
+		network: network,
 		logger:  log.New(ioutil.Discard, "", 0),
 	}
 
@@ -84,12 +94,11 @@ func (c *Client) SetLogger(l *log.Logger) {
 	c.logger = l
 }
 
-func (c *Client) SetNetwork(net Network) {
-	switch net {
-	case Mainnet, Testnet:
-		c.network = net
-	default:
-		panic(fmt.Sprintf("setting invalid network '%s' for client. Expecting: %s or %s", net, Mainnet, Testnet))
+func (c *Client) RPCClient() (*RPCClient, error) {
+	if c.rpcClient == nil {
+		return newRPCClient(c.baseURL.String(), c.apiKey, c.network)
+	} else {
+		return c.rpcClient, nil
 	}
 }
 

@@ -24,11 +24,10 @@ var (
 )
 
 func TestRockside(t *testing.T) {
-	client, err := rockside.NewClient(rocksideURL, os.Getenv("ROCKSIDE_API_KEY"))
+	client, err := rockside.NewClient(rocksideURL, os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
 	if err != nil {
 		t.Fatal(err)
 	}
-	client.SetNetwork(rockside.Testnet)
 
 	t.Run("Identities", func(t *testing.T) {
 		t.Parallel()

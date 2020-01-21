@@ -38,18 +38,18 @@ func init() {
 	deployContractCmd.PersistentFlags().BoolVar(&printContractCreationBinFlag, "print-creation-bin", false, "Compile, print contract creation bytecode and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&compileContractOnlyFlag, "compile-only", false, "Compile without deploying and exit")
 
-	rootCmd.AddCommand(eoaCmd, identitiesCmd, bouncerProxyCmd, transactionCmd, deployContractCmd)
+	rootCmd.AddCommand(eoaCmd, identitiesCmd, bouncerProxyCmd, transactionCmd, deployContractCmd, rpcCmd)
 }
 
 func RocksideClient() *rockside.Client {
-	client, err := rockside.NewClient(rocksideURLFlag, envRocksideAPIKey)
+	network := rockside.Mainnet
+	if testnetFlag {
+		network = rockside.Testnet
+	}
+
+	client, err := rockside.NewClient(rocksideURLFlag, envRocksideAPIKey, network)
 	if err != nil {
 		log.Fatal(err)
-	}
-	if testnetFlag {
-		client.SetNetwork(rockside.Testnet)
-	} else {
-		client.SetNetwork(rockside.Mainnet)
 	}
 	if verboseFlag {
 		client.SetLogger(log.New(os.Stderr, "", 0))

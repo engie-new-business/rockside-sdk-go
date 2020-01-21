@@ -1,15 +1,23 @@
 package rockside
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
-func NewRPCClient(rocksideBaseURL, APIKey string, network Network) (*ethclient.Client, error) {
+type RPCClient struct {
+	endpoint       *url.URL
+	authHTTPClient *http.Client
+	*ethclient.Client
+}
+
+func newRPCClient(rocksideBaseURL, APIKey string, network Network) (*RPCClient, error) {
 	endpoint, err := url.Parse(fmt.Sprintf("%s/ethereum/%s/jsonrpc", rocksideBaseURL, network))
 	if err != nil {
 		return nil, fmt.Errorf("cannot build RPC URL from %s (%s)", rocksideBaseURL, network)
@@ -18,12 +26,33 @@ func NewRPCClient(rocksideBaseURL, APIKey string, network Network) (*ethclient.C
 		return nil, fmt.Errorf("HTTPS scheme required for RPC client, got %s", rocksideBaseURL)
 	}
 
-	rpcClient, err := rpc.DialHTTPWithClient(endpoint.String(), &http.Client{Transport: &transport{APIKey}})
+	authHTTPClient := &http.Client{Transport: &transport{APIKey}}
+	rpcClient, err := rpc.DialHTTPWithClient(endpoint.String(), authHTTPClient)
 	if err != nil {
 		return nil, fmt.Errorf("cannot RPC dial with custom HTTP client: %s", err)
 	}
 
-	return ethclient.NewClient(rpcClient), nil
+	return &RPCClient{
+		endpoint:       endpoint,
+		authHTTPClient: authHTTPClient,
+		Client:         ethclient.NewClient(rpcClient),
+	}, nil
+}
+
+const ethAccountsPayload = `{"jsonrpc":"2.0", "id": 1, "method": "eth_accounts", "params": []}`
+
+func (r *RPCClient) EthAccounts() ([]string, error) {
+	resp, err := r.authHTTPClient.Post(r.endpoint.String(), "", strings.NewReader(ethAccountsPayload))
+	if err != nil {
+		return []string{}, err
+	}
+	v := struct {
+		Result []string `json:"result"`
+	}{}
+	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
+		return []string{}, err
+	}
+	return v.Result, nil
 }
 
 type transport struct {

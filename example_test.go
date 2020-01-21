@@ -25,11 +25,18 @@ func ExampleNewClient() {
 	fmt.Println(identities)
 }
 
-func ExampleNewRPCClient() {
-	rpc, err := rockside.NewRPCClient("https://api.rockside.io", os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
+func ExampleRPCClient() {
+	// Get a RPC client from your existing Rockside client.
+	rpc, err := client.RPCClient()
 	if err != nil {
 		panic(err)
 	}
+
+	accounts, err := rpc.EthAccounts()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(accounts)
 
 	balance, err := rpc.BalanceAt(context.Background(), common.Address{}, nil)
 	if err != nil {
