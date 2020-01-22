@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"github.com/rocksideio/rockside-sdk-go"
 	"log"
 	"os"
+
+	"github.com/rocksideio/rockside-sdk-go"
 
 	"github.com/spf13/cobra"
 )

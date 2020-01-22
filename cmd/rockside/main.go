@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/rocksideio/rockside-sdk-go"
 	"log"
 	"os"
+
+	"github.com/rocksideio/rockside-sdk-go"
 )
 
 var (

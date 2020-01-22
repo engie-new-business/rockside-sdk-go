@@ -4,18 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
 var (
 	rpcCmd = &cobra.Command{
-		Use:   "rpc",
-		Short: "Perform RPC call given as first argument",
+		Use:    "rpc",
+		Hidden: true,
+		Short:  "Use for testing the SDK rcp calls. Performs RPC call given as first argument",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			rpc, err := RocksideClient().RPCClient()
-			if err != nil {
-				return err
-			}
+			rpc := RocksideClient().RPCClient
 
 			if len(args) < 1 {
 				return errors.New("missing RPC method to call")
@@ -35,8 +34,9 @@ var (
 				}
 				fmt.Println(accounts)
 			default:
-				return fmt.Errorf("unknown RPC method %s", args[0])
+				return fmt.Errorf("RPC method %s not included for testing in CLI", args[0])
 			}
+
 			return nil
 		},
 	}
