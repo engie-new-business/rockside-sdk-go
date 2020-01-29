@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -28,6 +29,15 @@ func (n Network) EtherscanURL() string {
 		return fmt.Sprintf("https://%s.etherscan.io", n)
 	default:
 		return "https://etherscan.io"
+	}
+}
+
+func (n Network) ChainID() *big.Int {
+	switch n {
+	case Testnet:
+		return big.NewInt(3)
+	default:
+		return big.NewInt(1)
 	}
 }
 
