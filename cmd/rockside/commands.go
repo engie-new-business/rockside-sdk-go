@@ -89,31 +89,31 @@ var (
 )
 
 var (
-	bouncerProxyCmd = &cobra.Command{
-		Use:   "bouncerproxy",
-		Short: "Manage bouncer proxies",
+	relayableIdentityCmd = &cobra.Command{
+		Use:   "relayableidentity",
+		Short: "Manage relayable identities",
 	}
 
-	deployBouncerProxyCmd = &cobra.Command{
+	deployRelayableIdentityCmd = &cobra.Command{
 		Use:   "deploy",
-		Short: "deploy a bouncer proxy",
+		Short: "deploy a relayable identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("You need to provide the public address of the account")
 			}
 
-			bouncerproxy, err := RocksideClient().Contracts.CreateBouncerProxy(args[0])
+			relayableidentity, err := RocksideClient().RelayableIdentity.Create(args[0])
 			if err != nil {
 				return err
 			}
-			printJSON(bouncerproxy)
+			printJSON(relayableidentity)
 			return nil
 		},
 	}
 
 	getNonceCmd = &cobra.Command{
 		Use:   "nonce",
-		Short: "get nonce of a bouncer proxy",
+		Short: "get nonce of a relayable identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
 				return errors.New("Provide contract address as first param and account address as second param")
@@ -121,7 +121,7 @@ var (
 			contractAddress := args[0]
 			accountAddress := args[1]
 
-			nonce, err := RocksideClient().BouncerProxy.GetNonce(contractAddress, accountAddress)
+			nonce, err := RocksideClient().RelayableIdentity.GetNonce(contractAddress, accountAddress)
 			if err != nil {
 				return err
 			}
@@ -145,7 +145,7 @@ var (
 				return err
 			}
 
-			signResponse, err := RocksideClient().BouncerProxy.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data)
+			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data)
 
 			if err != nil {
 				return err
@@ -166,12 +166,12 @@ var (
 
 			contractAddress := args[0]
 			txJSON := args[1]
-			relayTx := &rockside.RelayTxRequest{}
+			relayTx := &rockside.RelayExecuteTxRequest{}
 			if err := json.Unmarshal([]byte(txJSON), relayTx); err != nil {
 				return err
 			}
 
-			relayResponse, err := RocksideClient().BouncerProxy.Relay(contractAddress, *relayTx)
+			relayResponse, err := RocksideClient().RelayableIdentity.RelayExecute(contractAddress, *relayTx)
 			if err != nil {
 				return err
 			}

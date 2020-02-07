@@ -180,24 +180,24 @@ func TestRockside(t *testing.T) {
 
 		fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 
-		t.Run("Create bouncer proxy", func(t *testing.T) {
-			bouncer, err := client.Contracts.CreateBouncerProxy(fromAddress.String())
+		t.Run("Create relayable identity", func(t *testing.T) {
+			relayableIdentity, err := client.RelayableIdentity.Create(fromAddress.String())
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if got, want := len(bouncer.BouncerProxyAddress), 42; got != want {
+			if got, want := len(relayableIdentity.Address), 42; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
-			if got, want := len(bouncer.TransactionHash), 66; got != want {
+			if got, want := len(relayableIdentity.TransactionHash), 66; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 
 			//Need to wait for contract deployment's transaction to be mined
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
-			t.Run("Bouncer proxy get nonce", func(t *testing.T) {
-				resp, err := client.BouncerProxy.GetNonce(bouncer.BouncerProxyAddress, fromAddress.String())
+			t.Run("Relayable identity get nonce", func(t *testing.T) {
+				resp, err := client.RelayableIdentity.GetNonce(relayableIdentity.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -207,18 +207,18 @@ func TestRockside(t *testing.T) {
 				}
 			})
 
-			t.Run("Bouncer proxy relay transaction", func(t *testing.T) {
-				signature, err := client.BouncerProxy.SignTxParams(privateKeyString, bouncer.BouncerProxyAddress, fromAddress.String(), fromAddress.String(), "0", "")
+			t.Run("Relayable identity relay transaction", func(t *testing.T) {
+				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, fromAddress.String(), fromAddress.String(), "0", "")
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				request := rockside.RelayTxRequest{
+				request := rockside.RelayExecuteTxRequest{
 					From:      fromAddress.String(),
 					To:        fromAddress.String(),
 					Signature: signature,
 				}
-				resp, err := client.BouncerProxy.Relay(bouncer.BouncerProxyAddress, request)
+				resp, err := client.RelayableIdentity.RelayExecute(relayableIdentity.Address, request)
 				if err != nil {
 					t.Fatal(err)
 				}

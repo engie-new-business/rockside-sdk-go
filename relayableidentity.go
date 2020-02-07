@@ -12,9 +12,9 @@ import (
 	gethSigner "github.com/ethereum/go-ethereum/signer/core"
 )
 
-type BouncerProxyEndpoint endpoint
+type RelayableIdentityEndpoint endpoint
 
-type RelayTxRequest struct {
+type RelayExecuteTxRequest struct {
 	From      string `json:"from"`
 	To        string `json:"to"`
 	Value     string `json:"value"`
@@ -26,30 +26,48 @@ type RelayTxResponse struct {
 	TransactionHash string `json:"transaction_hash"`
 }
 
-type nonceRequest struct {
-	Account string `json:"account"`
-}
-
 type NonceResponse struct {
 	Nonce string `json:"nonce"`
 }
 
-func (b *BouncerProxyEndpoint) Relay(contractAddress string, request RelayTxRequest) (RelayTxResponse, error) {
-	var result RelayTxResponse
+type CreateRelayableIdentityResponse struct {
+	Address         string `json:"address"`
+	TransactionHash string `json:"transaction_hash"`
+}
 
-	path := fmt.Sprintf("ethereum/%s/contracts/bouncerproxy/%s/relay", b.client.network, contractAddress)
-	if _, err := b.client.post(path, request, &result); err != nil {
+func (e *RelayableIdentityEndpoint) Create(account string) (CreateRelayableIdentityResponse, error) {
+	var result CreateRelayableIdentityResponse
+
+	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity", e.client.network)
+	req := struct {
+		Account string `json:"account"`
+	}{Account: account}
+	if _, err := e.client.post(path, req, &result); err != nil {
 		return result, err
 	}
 
 	return result, nil
 }
 
-func (b *BouncerProxyEndpoint) GetNonce(contractAddress string, account string) (NonceResponse, error) {
+func (e *RelayableIdentityEndpoint) RelayExecute(contractAddress string, request RelayExecuteTxRequest) (RelayTxResponse, error) {
+	var result RelayTxResponse
+
+	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/relayExecute", e.client.network, contractAddress)
+	if _, err := e.client.post(path, request, &result); err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func (e *RelayableIdentityEndpoint) GetNonce(contractAddress string, account string) (NonceResponse, error) {
 	var result NonceResponse
 
-	path := fmt.Sprintf("ethereum/%s/contracts/bouncerproxy/%s/nonce", b.client.network, contractAddress)
-	_, err := b.client.post(path, nonceRequest{Account: account}, &result)
+	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/nonce", e.client.network, contractAddress)
+	req := struct {
+		Account string `json:"account"`
+	}{Account: account}
+	_, err := e.client.post(path, req, &result)
 	if err != nil {
 		return result, err
 	}
@@ -103,7 +121,7 @@ func getHash(bouncer, signer, destination common.Address, value *big.Int, data [
 	return crypto.Keccak256(rawData), nil
 }
 
-func (b *BouncerProxyEndpoint) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string) (string, error) {
+func (b *RelayableIdentityEndpoint) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err

@@ -12,11 +12,10 @@ import (
 var client *rockside.Client
 
 func ExampleNewClient() {
-	client, err := rockside.NewClient("https://api.rockside.io", os.Getenv("ROCKSIDE_API_KEY"))
+	client, err := rockside.NewClient("https://api.rockside.io", os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
 	if err != nil {
 		panic(err)
 	}
-	client.SetNetwork(rockside.Testnet)
 
 	identities, err := client.Identities.List()
 	if err != nil {
@@ -27,10 +26,7 @@ func ExampleNewClient() {
 
 func ExampleRPCClient() {
 	// Get a RPC client from your existing Rockside client.
-	rpc, err := client.RPCClient()
-	if err != nil {
-		panic(err)
-	}
+	rpc := client.RPCClient
 
 	accounts, err := rpc.EthAccounts()
 	if err != nil {
