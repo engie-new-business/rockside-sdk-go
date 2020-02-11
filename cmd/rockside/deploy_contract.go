@@ -42,7 +42,7 @@ var (
 				case 1:
 					solFilepath = solidityFiles[0]
 				default:
-					return errors.New("too many contracts in current directory. Give filepath of one contract")
+					return errors.New("multiple contracts in current directory. Give filepath of one contract")
 				}
 			}
 
@@ -93,7 +93,7 @@ var (
 					return errors.New("no Rockside identities found")
 				}
 
-				identity = identities[0]
+				identity = identities[len(identities)-1]
 			}
 
 			b, err := json.Marshal(contract.Info.AbiDefinition)
@@ -101,7 +101,7 @@ var (
 				return fmt.Errorf("cannot marshal ABI JSON definition: %s", err)
 			}
 
-			log.Printf("deploying contract with Rockside identity %s", identity)
+			log.Printf("deploying contract through Rockside identity %s", identity)
 
 			tx, err := RocksideClient().DeployContractWithIdentity(identity, contract.Code, string(b))
 			if err != nil {

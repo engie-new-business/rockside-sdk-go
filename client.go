@@ -180,7 +180,7 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	c.logger.Printf("<<<<<< Response %s\n-----\n\n", dump)
 
 	if status := resp.StatusCode; status > 299 || status < 200 {
-		context := fmt.Sprintf("[network: %s, URL: '%s']", c.CurrentNetwork(), c.URL())
+		context := fmt.Sprintf("[network: %s, status: %s, URL: '%s']", c.CurrentNetwork(), resp.Status, c.URL())
 		if msg, err := decodeJSONErr(resp.Body); err != nil {
 			return resp, fmt.Errorf("body returned from %s does not seem to be JSON (try verbose mode): %s", context, err)
 		} else {

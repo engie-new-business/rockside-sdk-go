@@ -39,7 +39,7 @@ func init() {
 	deployContractCmd.PersistentFlags().BoolVar(&printContractCreationBinFlag, "print-creation-bin", false, "Compile, print contract creation bytecode and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&compileContractOnlyFlag, "compile-only", false, "Compile without deploying and exit")
 
-	rootCmd.AddCommand(eoaCmd, identitiesCmd, relayableIdentityCmd, transactionCmd, deployContractCmd, rpcCmd)
+	rootCmd.AddCommand(eoaCmd, identitiesCmd, relayableIdentityCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd)
 }
 
 func RocksideClient() *rockside.Client {
