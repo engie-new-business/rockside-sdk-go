@@ -2,6 +2,8 @@ package rockside
 
 import (
 	"fmt"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type identitiesEndpoint endpoint
@@ -31,4 +33,17 @@ func (i *identitiesEndpoint) List() ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func (i *identitiesEndpoint) Exists(identityAddress common.Address) (bool, error) {
+	all, err := i.client.Identities.List()
+	if err != nil {
+		return false, err
+	}
+	for _, item := range all {
+		if item == identityAddress.String() {
+			return true, nil
+		}
+	}
+	return false, nil
 }

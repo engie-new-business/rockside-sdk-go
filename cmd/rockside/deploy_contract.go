@@ -105,7 +105,7 @@ var (
 
 			tx, err := RocksideClient().DeployContractWithIdentity(identity, contract.Code, string(b))
 			if err != nil {
-				return fmt.Errorf("cannot deploy contract: %s", err)
+				return fmt.Errorf("cannot deploy contract: %s (txhash=%s)", err, tx)
 			}
 
 			log.Printf("successfully deployed contract with receipt %s/tx/%s", RocksideClient().CurrentNetwork().EtherscanURL(), tx)
