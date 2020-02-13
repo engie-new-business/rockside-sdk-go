@@ -99,7 +99,7 @@ var (
 		Short: "deploy a relayable identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.New("You need to provide the public address of the account")
+				return errors.New("missing public address of the account")
 			}
 
 			relayableidentity, err := RocksideClient().RelayableIdentity.Create(args[0])
@@ -116,7 +116,7 @@ var (
 		Short: "get nonce of a relayable identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
-				return errors.New("Provide contract address as first param and account address as second param")
+				return errors.New("missing contract address as first param and account address as second param")
 			}
 			contractAddress := args[0]
 			accountAddress := args[1]
@@ -135,7 +135,7 @@ var (
 		Short: "sign transaction and parameters to be relayed",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
-				return errors.New("Provide your contract address and tx {\"from\":\"\",\"to\":\"\", \"value\":\"\", \"data\":\"\" } as parameter.")
+				return errors.New("missing contract address and transaction payload {\"from\":\"\",\"to\":\"\", \"value\":\"\", \"data\":\"\" }")
 			}
 
 			contractAddress := args[0]
@@ -161,7 +161,7 @@ var (
 		Short: "relay transaction",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
-				return errors.New("Provide your contact address and tx parameters '{\"from\":\"\", \"to\":\"\" \"value\":\"\", \"data\":\"\", \"signature\":\"\"}'")
+				return errors.New("missing contract address and transaction payload {\"from\":\"\", \"to\":\"\" \"value\":\"\", \"data\":\"\", \"signature\":\"\"}")
 			}
 
 			contractAddress := args[0]
@@ -193,7 +193,7 @@ var (
 		Short: "send transaction",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.New("Provide your tx {\"from\":\"\",\"to\":\"\", \"value\":\"\", gas:\"\", \"gasPrice\":\"\", \"nonce\":\"\"} as parameter.")
+				return errors.New("missing transaction payload {\"from\":\"\",\"to\":\"\", \"value\":\"\", gas:\"\", \"gasPrice\":\"\", \"nonce\":\"\"}")
 
 			}
 			txJSON := args[0]
