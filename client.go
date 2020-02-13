@@ -53,10 +53,10 @@ type Client struct {
 
 	RPCClient *RPCClient
 
-	EOA               *EOAEndpoint
-	Identities        *IdentitiesEndpoint
-	Transaction       *TransactionEndpoint
-	RelayableIdentity *RelayableIdentityEndpoint
+	EOA               *eoaEndpoint
+	Identities        *identitiesEndpoint
+	Transaction       *transactionEndpoint
+	RelayableIdentity *relayableIdentityEndpoint
 }
 
 func NewClient(rocksideBaseURL, apiKey string, net Network) (*Client, error) {
@@ -107,10 +107,10 @@ func NewClient(rocksideBaseURL, apiKey string, net Network) (*Client, error) {
 		logger:         log.New(ioutil.Discard, "", 0),
 	}
 
-	c.EOA = &EOAEndpoint{c}
-	c.Identities = &IdentitiesEndpoint{c}
-	c.Transaction = &TransactionEndpoint{c}
-	c.RelayableIdentity = &RelayableIdentityEndpoint{c}
+	c.EOA = &eoaEndpoint{c}
+	c.Identities = &identitiesEndpoint{c}
+	c.Transaction = &transactionEndpoint{c}
+	c.RelayableIdentity = &relayableIdentityEndpoint{c}
 
 	return c, nil
 }

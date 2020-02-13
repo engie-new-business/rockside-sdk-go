@@ -1,12 +1,12 @@
 package rockside
 
-type EOAEndpoint endpoint
+type eoaEndpoint endpoint
 
 type CreateEOAResponse struct {
 	Address string `json:"address"`
 }
 
-func (e *EOAEndpoint) Create() (CreateEOAResponse, error) {
+func (e *eoaEndpoint) Create() (CreateEOAResponse, error) {
 	var result CreateEOAResponse
 
 	if _, err := e.client.post("ethereum/eoa", nil, &result); err != nil {
@@ -16,7 +16,7 @@ func (e *EOAEndpoint) Create() (CreateEOAResponse, error) {
 	return result, nil
 }
 
-func (e *EOAEndpoint) List() ([]string, error) {
+func (e *eoaEndpoint) List() ([]string, error) {
 	var result []string
 
 	if _, err := e.client.get("ethereum/eoa", nil, &result); err != nil {

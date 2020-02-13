@@ -6,7 +6,7 @@ import (
 )
 
 func TestValidateTransactionFields(t *testing.T) {
-	endpoint := new(TransactionEndpoint)
+	endpoint := new(transactionEndpoint)
 	validAddress := "0x268ba693540A7176ae5d3ba9256A18efbe0A63FF"
 	tests := []struct {
 		tx          Transaction

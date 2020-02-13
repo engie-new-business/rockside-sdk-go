@@ -4,14 +4,14 @@ import (
 	"fmt"
 )
 
-type IdentitiesEndpoint endpoint
+type identitiesEndpoint endpoint
 
 type CreateIdentitiesResponse struct {
 	Address         string `json:"address"`
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (i *IdentitiesEndpoint) Create() (CreateIdentitiesResponse, error) {
+func (i *identitiesEndpoint) Create() (CreateIdentitiesResponse, error) {
 	var result CreateIdentitiesResponse
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
@@ -22,7 +22,7 @@ func (i *IdentitiesEndpoint) Create() (CreateIdentitiesResponse, error) {
 	return result, nil
 }
 
-func (i *IdentitiesEndpoint) List() ([]string, error) {
+func (i *identitiesEndpoint) List() ([]string, error) {
 	var result []string
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
