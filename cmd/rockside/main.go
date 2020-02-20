@@ -32,6 +32,7 @@ func init() {
 	transactionCmd.AddCommand(sentTxCmd)
 	eoaCmd.AddCommand(listEOACmd, createEOACmd)
 	identitiesCmd.AddCommand(listIdentitiesCmd, createIdentitiesCmd)
+	tokensCmd.AddCommand(createTokenCmd)
 
 	deployContractCmd.PersistentFlags().StringVar(&identityToDeployContractFlag, "identity-address", "", "Address of Rockside identity to use as 'from' when deploying contract")
 	deployContractCmd.PersistentFlags().BoolVar(&printContractABIFlag, "print-abi", false, "Compile, print contract abi and exit")
@@ -39,7 +40,7 @@ func init() {
 	deployContractCmd.PersistentFlags().BoolVar(&printContractCreationBinFlag, "print-creation-bin", false, "Compile, print contract creation bytecode and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&compileContractOnlyFlag, "compile-only", false, "Compile without deploying and exit")
 
-	rootCmd.AddCommand(eoaCmd, identitiesCmd, relayableIdentityCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd)
+	rootCmd.AddCommand(eoaCmd, identitiesCmd, relayableIdentityCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd, tokensCmd)
 }
 
 func RocksideClient() *rockside.Client {

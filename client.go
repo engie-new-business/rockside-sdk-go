@@ -57,6 +57,7 @@ type Client struct {
 	Identities        *identitiesEndpoint
 	Transaction       *transactionEndpoint
 	RelayableIdentity *relayableIdentityEndpoint
+	Tokens            *tokensEndpoint
 }
 
 func NewClient(rocksideBaseURL, apiKey string, net Network) (*Client, error) {
@@ -111,6 +112,7 @@ func NewClient(rocksideBaseURL, apiKey string, net Network) (*Client, error) {
 	c.Identities = &identitiesEndpoint{c}
 	c.Transaction = &transactionEndpoint{c}
 	c.RelayableIdentity = &relayableIdentityEndpoint{c}
+	c.Tokens = &tokensEndpoint{c}
 
 	return c, nil
 }
