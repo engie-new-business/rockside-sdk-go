@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rocksideio/rockside-sdk-go"
 )
@@ -54,32 +52,5 @@ func ExampleDeployContractWithIdentity() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(txHash)
-}
-
-func Example_contractReadCallUsingContractABIBindings() {
-	contractAddress := common.HexToAddress("my_contract_address")
-	contract, err := NewContractCaller(contractAddress, rocksideClient.RPCClient)
-	if err != nil {
-		panic(err)
-	}
-
-	timestamp, _ := contract.Read(&bind.CallOpts{}, [32]byte{})
-	fmt.Println(timestamp)
-}
-
-func Example_gaslessContractWriteCallUsingContractABIBindings() {
-	rocksideIdentityAddress := common.HexToAddress("my_rockside_identity_contract_address")
-	contractAddress := common.HexToAddress("my_contract_address")
-
-	rocksideTransactor := rockside.NewTransactor(rocksideIdentityAddress, rocksideClient)
-	contract, err := NewContractTransactor(contractAddress, rocksideTransactor)
-	if err != nil {
-		panic(err)
-	}
-
-	tx, _ := contract.Write(rockside.TransactOpts(), [32]byte{})
-
-	txHash := rocksideTransactor.LookupRocksideTransactionHash(tx.Hash())
 	fmt.Println(txHash)
 }
