@@ -43,8 +43,8 @@ func NewTransactor(rocksideIdentity common.Address, client *Client) *Transactor 
 }
 
 func (t *Transactor) ReturnRocksideTransactionHash(hash common.Hash) string {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	if txhash, ok := t.transactions[hash]; ok {
 		delete(t.transactions, hash)
 		return txhash

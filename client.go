@@ -80,7 +80,7 @@ func NewClient(apiKey string, net Network, rocksideBaseURL ...string) (*Client, 
 		return nil, err
 	}
 	if u.Scheme != "https" {
-		return nil, fmt.Errorf("init client: expected base URL with HTTPS scheme but got URL '%s'", rocksideBaseURL)
+		return nil, fmt.Errorf("init client: expected base URL with HTTPS scheme but got URL '%s'", u)
 	}
 
 	if len(apiKey) == 0 {
@@ -90,9 +90,9 @@ func NewClient(apiKey string, net Network, rocksideBaseURL ...string) (*Client, 
 		return nil, fmt.Errorf("init client: expected length of API key to be 32 but got %d", len(apiKey))
 	}
 
-	rpcEndpoint, err := url.Parse(fmt.Sprintf("%s/ethereum/%s/jsonrpc", rocksideBaseURL, network))
+	rpcEndpoint, err := url.Parse(fmt.Sprintf("%s/ethereum/%s/jsonrpc", u, network))
 	if err != nil {
-		return nil, fmt.Errorf("cannot build RPC URL from %s (%s)", rocksideBaseURL, network)
+		return nil, fmt.Errorf("cannot build RPC URL from %s (%s)", u, network)
 	}
 
 	authHTTPClient := &http.Client{Transport: &authTransport{apiKey}}
@@ -205,7 +205,7 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 }
 
 func (c *Client) errorContextString(resp *http.Response) string {
-	return fmt.Sprintf("[status: %s, URL: '%s', network: %s, request ID: %s]", resp.Status, c.CurrentNetwork(), c.URL(), resp.Header.Get("X-Request-ID"))
+	return fmt.Sprintf("[status: %s, URL: '%s', network: %s, request ID: %s]", resp.Status, c.URL(), c.CurrentNetwork(), resp.Header.Get("X-Request-ID"))
 }
 
 func decodeJSONErr(body io.Reader) (string, error) {
