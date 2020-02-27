@@ -27,7 +27,7 @@ type SendTxResponse struct {
 func (t *transactionEndpoint) Send(transaction Transaction) (SendTxResponse, error) {
 	var result SendTxResponse
 
-	if err := transaction.ValidateFields(); err != nil {
+	if err := transaction.validateFields(); err != nil {
 		return result, err
 	}
 
@@ -39,7 +39,7 @@ func (t *transactionEndpoint) Send(transaction Transaction) (SendTxResponse, err
 	return result, nil
 }
 
-func (t Transaction) ValidateFields() error {
+func (t Transaction) validateFields() error {
 	if !common.IsHexAddress(t.From) {
 		return errors.New("invalid 'from' address")
 	}

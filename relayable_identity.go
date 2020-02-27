@@ -22,21 +22,21 @@ type RelayExecuteTxRequest struct {
 	Signature string `json:"signature"`
 }
 
-type RelayTxResponse struct {
+type relayTxResponse struct {
 	TransactionHash string `json:"transaction_hash"`
 }
 
-type NonceResponse struct {
+type nonceResponse struct {
 	Nonce string `json:"nonce"`
 }
 
-type CreateRelayableIdentityResponse struct {
+type createRelayableIdentityResponse struct {
 	Address         string `json:"address"`
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (e *relayableIdentityEndpoint) Create(account string) (CreateRelayableIdentityResponse, error) {
-	var result CreateRelayableIdentityResponse
+func (e *relayableIdentityEndpoint) Create(account string) (createRelayableIdentityResponse, error) {
+	var result createRelayableIdentityResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity", e.client.network)
 	req := struct {
@@ -49,8 +49,8 @@ func (e *relayableIdentityEndpoint) Create(account string) (CreateRelayableIdent
 	return result, nil
 }
 
-func (e *relayableIdentityEndpoint) RelayExecute(contractAddress string, request RelayExecuteTxRequest) (RelayTxResponse, error) {
-	var result RelayTxResponse
+func (e *relayableIdentityEndpoint) RelayExecute(contractAddress string, request RelayExecuteTxRequest) (relayTxResponse, error) {
+	var result relayTxResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/relayExecute", e.client.network, contractAddress)
 	if _, err := e.client.post(path, request, &result); err != nil {
@@ -60,8 +60,8 @@ func (e *relayableIdentityEndpoint) RelayExecute(contractAddress string, request
 	return result, nil
 }
 
-func (e *relayableIdentityEndpoint) GetNonce(contractAddress string, account string) (NonceResponse, error) {
-	var result NonceResponse
+func (e *relayableIdentityEndpoint) GetNonce(contractAddress string, account string) (nonceResponse, error) {
+	var result nonceResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/nonce", e.client.network, contractAddress)
 	req := struct {

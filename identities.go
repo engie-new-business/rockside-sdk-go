@@ -8,13 +8,13 @@ import (
 
 type identitiesEndpoint endpoint
 
-type CreateIdentitiesResponse struct {
+type createIdentitiesResponse struct {
 	Address         string `json:"address"`
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (i *identitiesEndpoint) Create() (CreateIdentitiesResponse, error) {
-	var result CreateIdentitiesResponse
+func (i *identitiesEndpoint) Create() (createIdentitiesResponse, error) {
+	var result createIdentitiesResponse
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
 	if _, err := i.client.post(path, nil, &result); err != nil {

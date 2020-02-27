@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-func (c *Client) DeployContractWithIdentity(rocksideIdentityAddr string, code, jsonABI string) (string, error) {
+func (c *Client) DeployContractWithIdentity(rocksideIdentityAddr, code, jsonABI string) (string, error) {
 	if _, err := hexutil.Decode(rocksideIdentityAddr); err != nil {
 		return "", fmt.Errorf("invalid identity address: %s", err)
 	}

@@ -41,7 +41,7 @@ func ExampleRPCClient() {
 	fmt.Println(balance)
 }
 
-func ExampleDeployContractWithIdentity() {
+func ExampleClient_DeployContractWithIdentity() {
 	identities, err := rocksideClient.Identities.List()
 	if err != nil {
 		panic(err)

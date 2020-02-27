@@ -18,13 +18,7 @@ var (
 )
 
 func TransactOpts() *bind.TransactOpts {
-	return &bind.TransactOpts{
-		Nonce:    big.NewInt(0),
-		Signer:   noopSigner(),
-		Value:    big.NewInt(0),
-		GasPrice: big.NewInt(0),
-		GasLimit: 1, // > 0 to not kick in the transactor.EstimateGas
-	}
+	return &bind.TransactOpts{Signer: noopSigner()}
 }
 
 func noopSigner() bind.SignerFn {
@@ -48,24 +42,28 @@ func NewTransactor(rocksideIdentity common.Address, client *Client) *Transactor 
 	}
 }
 
-func (t *Transactor) LookupRocksideTransactionHash(hash common.Hash) string {
+func (t *Transactor) ReturnRocksideTransactionHash(hash common.Hash) string {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	return t.transactions[hash]
+	if txhash, ok := t.transactions[hash]; ok {
+		delete(t.transactions, hash)
+		return txhash
+	}
+	return ""
 }
 
 func (t *Transactor) PendingCodeAt(ctx context.Context, account common.Address) ([]byte, error) {
 	return t.client.RPCClient.PendingCodeAt(ctx, account)
 }
 func (t *Transactor) PendingNonceAt(ctx context.Context, account common.Address) (uint64, error) {
-	return t.client.RPCClient.PendingNonceAt(ctx, account)
+	return 0, nil // Rockside manage the nonce
 }
 func (t *Transactor) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 	return t.client.RPCClient.SuggestGasPrice(ctx)
 }
 
 func (t *Transactor) EstimateGas(ctx context.Context, call ethereum.CallMsg) (gas uint64, err error) {
-	return t.client.RPCClient.EstimateGas(ctx, call)
+	return 0, nil // Rockside manage the gas
 }
 
 func (t *Transactor) SendTransaction(ctx context.Context, tx *types.Transaction) error {
@@ -74,7 +72,7 @@ func (t *Transactor) SendTransaction(ctx context.Context, tx *types.Transaction)
 		To:       tx.To().String(),
 		Value:    hexutil.EncodeBig(tx.Value()),
 		Data:     hexutil.Encode(tx.Data()),
-		Gas:      hexutil.EncodeUint64(0), // set to 0 as Rockside manage the gas
+		Gas:      hexutil.EncodeUint64(tx.Gas()),
 		GasPrice: hexutil.EncodeBig(tx.GasPrice()),
 	})
 	if err == nil {

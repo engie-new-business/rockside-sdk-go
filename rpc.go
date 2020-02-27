@@ -42,7 +42,7 @@ func (e *rpcError) Error() string {
 }
 
 func (r *RPCClient) SendTransactionFromIdentity(tx Transaction) (string, error) {
-	if err := tx.ValidateFields(); err != nil {
+	if err := tx.validateFields(); err != nil {
 		return "", err
 	}
 

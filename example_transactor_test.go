@@ -21,6 +21,6 @@ func Example_gaslessContractTransactor() {
 
 	tx, _ := contract.Write(rockside.TransactOpts(), [32]byte{})
 
-	txHash := rocksideTransactor.LookupRocksideTransactionHash(tx.Hash())
+	txHash := rocksideTransactor.ReturnRocksideTransactionHash(tx.Hash())
 	fmt.Println(txHash)
 }
