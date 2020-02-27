@@ -60,7 +60,7 @@ type Client struct {
 	Tokens            *tokensEndpoint
 }
 
-func NewClient(rocksideBaseURL, apiKey string, net Network) (*Client, error) {
+func NewClient(apiKey string, net Network, rocksideBaseURL ...string) (*Client, error) {
 	var network Network
 
 	switch net {
@@ -70,7 +70,12 @@ func NewClient(rocksideBaseURL, apiKey string, net Network) (*Client, error) {
 		return nil, fmt.Errorf("init client: invalid network '%s' for client. Expecting: %s or %s", net, Mainnet, Testnet)
 	}
 
-	u, err := url.Parse(rocksideBaseURL)
+	baseURL := "https://api.rockside.io"
+	if len(rocksideBaseURL) > 0 {
+		baseURL = rocksideBaseURL[0]
+	}
+
+	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +187,7 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	c.logger.Printf("<<<<<< Response %s\n-----\n\n", dump)
 
 	if status := resp.StatusCode; status > 299 || status < 200 {
-		context := fmt.Sprintf("[network: %s, status: %s, URL: '%s', request ID: %s]", c.CurrentNetwork(), resp.Status, c.URL(), resp.Header.Get("X-Request-ID"))
+		context := c.errorContextString(resp)
 		if msg, err := decodeJSONErr(resp.Body); err != nil {
 			return resp, fmt.Errorf("non JSON body returned (try verbose mode) %s: %s", context, err)
 		} else {
@@ -197,6 +202,10 @@ func (c *Client) performRequest(method, urlPath string, body interface{}, decode
 	}
 
 	return resp, nil
+}
+
+func (c *Client) errorContextString(resp *http.Response) string {
+	return fmt.Sprintf("[status: %s, URL: '%s', network: %s, request ID: %s]", resp.Status, c.CurrentNetwork(), c.URL(), resp.Header.Get("X-Request-ID"))
 }
 
 func decodeJSONErr(body io.Reader) (string, error) {

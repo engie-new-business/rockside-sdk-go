@@ -6,19 +6,19 @@ Official Rockside SDK for GO applications.
 
 ## Client Library Usage
 
-To use the client look at the [reference and examples](https://godoc.org/github.com/rocksideio/rockside-sdk-go) 
+To use the client look at the [reference and examples](https://pkg.go.dev/github.com/rocksideio/rockside-sdk-go?tab=overview) 
 
 ## Command Line Interface Usage
 
 To interact with the Rockside API, deploy contracts, etc. we provide a CLI (that uses the Rockside SDK GO)
 
-### Install 
+#### Install 
 
 Get the latest CLI binary for [macOS, Windows or Linux here](https://github.com/rocksideio/rockside-sdk-go/releases)!
 
 (... or if you have GO locally do: `go get github.com/rocksideio/rockside-sdk-go/cmd/rockside`)
 
-### Usage
+#### Usage
 
 Display the various commands & flags available with:
 

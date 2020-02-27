@@ -49,7 +49,7 @@ func RocksideClient() *rockside.Client {
 		network = rockside.Testnet
 	}
 
-	client, err := rockside.NewClient(rocksideURLFlag, envRocksideAPIKey, network)
+	client, err := rockside.NewClient(envRocksideAPIKey, network, rocksideURLFlag)
 	if err != nil {
 		log.Fatal(err)
 	}

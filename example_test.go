@@ -5,19 +5,21 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rocksideio/rockside-sdk-go"
 )
 
-var client *rockside.Client
+var rocksideClient *rockside.Client
 
 func ExampleNewClient() {
-	client, err := rockside.NewClient("https://api.rockside.io", os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
+	rocksideAPIclient, err := rockside.NewClient(os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
 	if err != nil {
 		panic(err)
 	}
 
-	identities, err := client.Identities.List()
+	identities, err := rocksideAPIclient.Identities.List()
 	if err != nil {
 		panic(err)
 	}
@@ -26,7 +28,7 @@ func ExampleNewClient() {
 
 func ExampleRPCClient() {
 	// Get a RPC client from your existing Rockside client.
-	rpc := client.RPCClient
+	rpc := rocksideClient.RPCClient
 
 	accounts, err := rpc.EthAccounts()
 	if err != nil {
@@ -41,16 +43,43 @@ func ExampleRPCClient() {
 	fmt.Println(balance)
 }
 
-func ExampleDeployContract() {
-	identities, err := client.Identities.List()
+func ExampleDeployContractWithIdentity() {
+	identities, err := rocksideClient.Identities.List()
 	if err != nil {
 		panic(err)
 	}
 
 	var contractCode, jsonABI string
-	txHash, err := client.DeployContractWithIdentity(identities[0], contractCode, jsonABI)
+	txHash, err := rocksideClient.DeployContractWithIdentity(identities[0], contractCode, jsonABI)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(txHash)
+}
+
+func Example_contractReadCallUsingContractABIBindings() {
+	contractAddress := common.HexToAddress("my_contract_address")
+	contract, err := NewContractCaller(contractAddress, rocksideClient.RPCClient)
+	if err != nil {
+		panic(err)
+	}
+
+	timestamp, _ := contract.Read(&bind.CallOpts{}, [32]byte{})
+	fmt.Println(timestamp)
+}
+
+func Example_gaslessContractWriteCallUsingContractABIBindings() {
+	rocksideIdentityAddress := common.HexToAddress("my_rockside_identity_contract_address")
+	contractAddress := common.HexToAddress("my_contract_address")
+
+	rocksideTransactor := rockside.NewTransactor(rocksideIdentityAddress, rocksideClient)
+	contract, err := NewContractTransactor(contractAddress, rocksideTransactor)
+	if err != nil {
+		panic(err)
+	}
+
+	tx, _ := contract.Write(rockside.TransactOpts(), [32]byte{})
+
+	txHash := rocksideTransactor.LookupRocksideTransactionHash(tx.Hash())
 	fmt.Println(txHash)
 }

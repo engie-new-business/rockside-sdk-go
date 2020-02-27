@@ -23,7 +23,7 @@ func TransactOpts() *bind.TransactOpts {
 		Signer:   noopSigner(),
 		Value:    big.NewInt(0),
 		GasPrice: big.NewInt(0),
-		GasLimit: 0,
+		GasLimit: 1, // > 0 to not kick in the transactor.EstimateGas
 	}
 }
 
@@ -74,7 +74,7 @@ func (t *Transactor) SendTransaction(ctx context.Context, tx *types.Transaction)
 		To:       tx.To().String(),
 		Value:    hexutil.EncodeBig(tx.Value()),
 		Data:     hexutil.Encode(tx.Data()),
-		Gas:      hexutil.EncodeUint64(tx.Gas()),
+		Gas:      hexutil.EncodeUint64(0), // set to 0 as Rockside manage the gas
 		GasPrice: hexutil.EncodeBig(tx.GasPrice()),
 	})
 	if err == nil {
