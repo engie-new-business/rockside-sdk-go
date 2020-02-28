@@ -1,12 +1,12 @@
 package rockside
 
-type tokensEndpoint endpoint
+type Tokens endpoint
 
 type CreateTokenResponse struct {
 	Token string `json:"token"`
 }
 
-func (i *tokensEndpoint) Create(domain string, contracts []string) (CreateTokenResponse, error) {
+func (i *Tokens) Create(domain string, contracts []string) (CreateTokenResponse, error) {
 	var result CreateTokenResponse
 	req := struct {
 		Domain    string   `json:"domain"`

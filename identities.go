@@ -6,14 +6,14 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type identitiesEndpoint endpoint
+type Identities endpoint
 
 type createIdentitiesResponse struct {
 	Address         string `json:"address"`
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (i *identitiesEndpoint) Create() (createIdentitiesResponse, error) {
+func (i *Identities) Create() (createIdentitiesResponse, error) {
 	var result createIdentitiesResponse
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
@@ -24,7 +24,7 @@ func (i *identitiesEndpoint) Create() (createIdentitiesResponse, error) {
 	return result, nil
 }
 
-func (i *identitiesEndpoint) List() ([]string, error) {
+func (i *Identities) List() ([]string, error) {
 	var result []string
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
@@ -35,7 +35,7 @@ func (i *identitiesEndpoint) List() ([]string, error) {
 	return result, nil
 }
 
-func (i *identitiesEndpoint) Exists(identityAddress common.Address) (bool, error) {
+func (i *Identities) Exists(identityAddress common.Address) (bool, error) {
 	all, err := i.client.Identities.List()
 	if err != nil {
 		return false, err

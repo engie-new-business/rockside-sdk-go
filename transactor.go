@@ -31,22 +31,22 @@ type Transactor struct {
 	client           *Client
 	rocksideIdentity common.Address
 	mu               sync.RWMutex
-	transactions     map[common.Hash]string
+	Transaction      map[common.Hash]string
 }
 
 func NewTransactor(rocksideIdentity common.Address, client *Client) *Transactor {
 	return &Transactor{
 		client:           client,
 		rocksideIdentity: rocksideIdentity,
-		transactions:     make(map[common.Hash]string),
+		Transaction:      make(map[common.Hash]string),
 	}
 }
 
 func (t *Transactor) ReturnRocksideTransactionHash(hash common.Hash) string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	if txhash, ok := t.transactions[hash]; ok {
-		delete(t.transactions, hash)
+	if txhash, ok := t.Transaction[hash]; ok {
+		delete(t.Transaction, hash)
 		return txhash
 	}
 	return ""
@@ -78,7 +78,7 @@ func (t *Transactor) SendTransaction(ctx context.Context, tx *types.Transaction)
 	if err == nil {
 		t.mu.Lock()
 		defer t.mu.Unlock()
-		t.transactions[tx.Hash()] = resp.TransactionHash
+		t.Transaction[tx.Hash()] = resp.TransactionHash
 	}
 	return err
 }

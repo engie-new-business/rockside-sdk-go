@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-type transactionEndpoint endpoint
+type Transactions endpoint
 
 type Transaction struct {
 	From     string `json:"from,omitempty"`
@@ -24,7 +24,7 @@ type SendTxResponse struct {
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (t *transactionEndpoint) Send(transaction Transaction) (SendTxResponse, error) {
+func (t *Transactions) Send(transaction Transaction) (SendTxResponse, error) {
 	var result SendTxResponse
 
 	if err := transaction.validateFields(); err != nil {
