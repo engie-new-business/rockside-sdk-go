@@ -12,7 +12,7 @@ import (
 	gethSigner "github.com/ethereum/go-ethereum/signer/core"
 )
 
-type relayableIdentityEndpoint endpoint
+type RelayableIdentity endpoint
 
 type RelayExecuteTxRequest struct {
 	From      string `json:"from"`
@@ -35,7 +35,7 @@ type createRelayableIdentityResponse struct {
 	TransactionHash string `json:"transaction_hash"`
 }
 
-func (e *relayableIdentityEndpoint) Create(account string) (createRelayableIdentityResponse, error) {
+func (e *RelayableIdentity) Create(account string) (createRelayableIdentityResponse, error) {
 	var result createRelayableIdentityResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity", e.client.network)
@@ -49,7 +49,7 @@ func (e *relayableIdentityEndpoint) Create(account string) (createRelayableIdent
 	return result, nil
 }
 
-func (e *relayableIdentityEndpoint) RelayExecute(contractAddress string, request RelayExecuteTxRequest) (relayTxResponse, error) {
+func (e *RelayableIdentity) RelayExecute(contractAddress string, request RelayExecuteTxRequest) (relayTxResponse, error) {
 	var result relayTxResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/relayExecute", e.client.network, contractAddress)
@@ -60,7 +60,7 @@ func (e *relayableIdentityEndpoint) RelayExecute(contractAddress string, request
 	return result, nil
 }
 
-func (e *relayableIdentityEndpoint) GetNonce(contractAddress string, account string) (nonceResponse, error) {
+func (e *RelayableIdentity) GetNonce(contractAddress string, account string) (nonceResponse, error) {
 	var result nonceResponse
 
 	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/nonce", e.client.network, contractAddress)
@@ -121,7 +121,7 @@ func getHash(bouncer, signer, destination common.Address, value *big.Int, data [
 	return crypto.Keccak256(rawData), nil
 }
 
-func (b *relayableIdentityEndpoint) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string) (string, error) {
+func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
