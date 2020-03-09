@@ -9,9 +9,9 @@ type CreateTokenResponse struct {
 func (i *Tokens) Create(domain string, contracts []string) (CreateTokenResponse, error) {
 	var result CreateTokenResponse
 	req := struct {
-		Domain    string   `json:"domain"`
+		Origin    string   `json:"origin"`
 		Contracts []string `json:"contracts"`
-	}{Domain: domain, Contracts: contracts}
+	}{Origin: domain, Contracts: contracts}
 
 	if _, err := i.client.post("/tokens", req, &result); err != nil {
 		return result, err
