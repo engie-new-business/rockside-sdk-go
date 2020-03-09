@@ -8,13 +8,16 @@ import (
 )
 
 var (
-	envRocksideAPIKey = os.Getenv("ROCKSIDE_API_KEY")
-	envRocksideAPIURL = os.Getenv("ROCKSIDE_API_URL")
+	envRocksideAPIKey      = os.Getenv("ROCKSIDE_API_KEY")
+	envRocksideToken       = os.Getenv("ROCKSIDE_TOKEN")
+	envRocksideTokenOrigin = os.Getenv("ROCKSIDE_TOKEN_ORIGIN")
+	envRocksideAPIURL      = os.Getenv("ROCKSIDE_API_URL")
 
-	privateKeyFlag, rocksideURLFlag, identityToDeployContractFlag string
-	testnetFlag, verboseFlag                                      bool
-	printContractABIFlag, printContractRuntimeBinFlag             bool
-	compileContractOnlyFlag, printContractCreationBinFlag         bool
+	rocksideTokenOrigin, rocksideURLFlag                  string
+	privateKeyFlag, identityToDeployContractFlag          string
+	testnetFlag, verboseFlag                              bool
+	printContractABIFlag, printContractRuntimeBinFlag     bool
+	compileContractOnlyFlag, printContractCreationBinFlag bool
 )
 
 func init() {
@@ -23,6 +26,7 @@ func init() {
 	}
 
 	rootCmd.PersistentFlags().StringVar(&rocksideURLFlag, "url", envRocksideAPIURL, "Rockside API URL")
+	rootCmd.PersistentFlags().StringVar(&rocksideTokenOrigin, "token-origin", envRocksideTokenOrigin, "Origin associated with token")
 	rootCmd.PersistentFlags().BoolVar(&testnetFlag, "testnet", false, "Use testnet (Ropsten) instead of mainnet")
 	rootCmd.PersistentFlags().BoolVar(&verboseFlag, "verbose", false, "Verbose Rockside client")
 
@@ -49,7 +53,20 @@ func RocksideClient() *rockside.Client {
 		network = rockside.Testnet
 	}
 
-	client, err := rockside.NewClient(envRocksideAPIKey, network, rocksideURLFlag)
+	if envRocksideAPIKey != "" && envRocksideToken != "" {
+		log.Fatal("both ROCKSIDE_API_KEY and ROCKSIDE_TOKEN are defined as environment variables. Pick one!")
+	}
+
+	var (
+		client *rockside.Client
+		err    error
+	)
+	if envRocksideAPIKey != "" {
+		client, err = rockside.NewClientFromAPIKey(envRocksideAPIKey, network, rocksideURLFlag)
+	}
+	if envRocksideToken != "" {
+		client, err = rockside.NewClientFromToken(envRocksideToken, rocksideTokenOrigin, network, rocksideURLFlag)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -17,27 +17,39 @@ import (
 )
 
 var (
-	Testnet Network = "ropsten"
-	Mainnet Network = "mainnet"
+	Testnet           Network = "ropsten"
+	Mainnet           Network = "mainnet"
+	PoaNetworkMainnet Network = "poanetwork"
+	GethPrivateNet    Network = "gethprivate"
 )
 
 type Network string
 
-func (n Network) EtherscanURL() string {
+func (n Network) ExplorerURL() string {
 	switch n {
+	case Mainnet:
+		return "https://etherscan.io"
 	case Testnet:
 		return fmt.Sprintf("https://%s.etherscan.io", n)
+	case PoaNetworkMainnet:
+		return fmt.Sprintf("https://blockscout.com/poa/core")
 	default:
-		return "https://etherscan.io"
+		return ""
 	}
 }
 
 func (n Network) ChainID() *big.Int {
 	switch n {
+	case Mainnet:
+		return big.NewInt(1)
 	case Testnet:
 		return big.NewInt(3)
+	case PoaNetworkMainnet:
+		return big.NewInt(99)
+	case GethPrivateNet:
+		return big.NewInt(1337)
 	default:
-		return big.NewInt(1)
+		return big.NewInt(0)
 	}
 }
 
@@ -60,7 +72,43 @@ type Client struct {
 	Tokens            *Tokens
 }
 
-func NewClient(apiKey string, net Network, rocksideBaseURL ...string) (*Client, error) {
+const defaultRocksideURL = "https://api.rockside.io"
+
+func NewClientFromAPIKey(apiKey string, net Network, rocksideBaseURL ...string) (*Client, error) {
+	if len(apiKey) == 0 {
+		return nil, fmt.Errorf("init client: no API key found. Try with env variable ROCKSIDE_API_KEY")
+	}
+	if len(apiKey) != 32 {
+		return nil, fmt.Errorf("init client: expected length of API key to be 32 but got %d", len(apiKey))
+	}
+
+	baseURL := defaultRocksideURL
+	if len(rocksideBaseURL) > 0 {
+		baseURL = rocksideBaseURL[0]
+	}
+
+	authFunc := func(req *http.Request) {
+		req.Header.Set("apikey", apiKey)
+	}
+
+	return newClient(&http.Client{Transport: &authenticatedHeaderTransport{authFunc}}, net, baseURL)
+}
+
+func NewClientFromToken(token, origin string, net Network, rocksideBaseURL ...string) (*Client, error) {
+	baseURL := defaultRocksideURL
+	if len(rocksideBaseURL) > 0 {
+		baseURL = rocksideBaseURL[0]
+	}
+
+	authFunc := func(req *http.Request) {
+		req.Header.Set("Origin", origin)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	}
+
+	return newClient(&http.Client{Transport: &authenticatedHeaderTransport{authFunc}}, net, baseURL)
+}
+
+func newClient(authenticatedHTTPClient *http.Client, net Network, baseURL string) (*Client, error) {
 	var network Network
 
 	switch net {
@@ -68,11 +116,6 @@ func NewClient(apiKey string, net Network, rocksideBaseURL ...string) (*Client, 
 		network = net
 	default:
 		return nil, fmt.Errorf("init client: invalid network '%s' for client. Expecting: %s or %s", net, Mainnet, Testnet)
-	}
-
-	baseURL := "https://api.rockside.io"
-	if len(rocksideBaseURL) > 0 {
-		baseURL = rocksideBaseURL[0]
 	}
 
 	u, err := url.Parse(baseURL)
@@ -83,20 +126,12 @@ func NewClient(apiKey string, net Network, rocksideBaseURL ...string) (*Client, 
 		return nil, fmt.Errorf("init client: expected base URL with HTTPS scheme but got URL '%s'", u)
 	}
 
-	if len(apiKey) == 0 {
-		return nil, fmt.Errorf("init client: no API key found. Try with env variable ROCKSIDE_API_KEY")
-	}
-	if len(apiKey) != 32 {
-		return nil, fmt.Errorf("init client: expected length of API key to be 32 but got %d", len(apiKey))
-	}
-
 	rpcEndpoint, err := url.Parse(fmt.Sprintf("%s/ethereum/%s/jsonrpc", u, network))
 	if err != nil {
 		return nil, fmt.Errorf("cannot build RPC URL from %s (%s)", u, network)
 	}
 
-	authHTTPClient := &http.Client{Transport: &authTransport{apiKey}}
-	rpcClient, err := rpc.DialHTTPWithClient(rpcEndpoint.String(), authHTTPClient)
+	rpcClient, err := rpc.DialHTTPWithClient(rpcEndpoint.String(), authenticatedHTTPClient)
 	if err != nil {
 		return nil, fmt.Errorf("cannot RPC dial with custom HTTP client: %s", err)
 	}
@@ -104,10 +139,10 @@ func NewClient(apiKey string, net Network, rocksideBaseURL ...string) (*Client, 
 	c := &Client{
 		RPCClient: &RPCClient{
 			endpoint:       rpcEndpoint,
-			authHTTPClient: authHTTPClient,
+			authHTTPClient: authenticatedHTTPClient,
 			Client:         ethclient.NewClient(rpcClient),
 		},
-		authHTTPClient: authHTTPClient,
+		authHTTPClient: authenticatedHTTPClient,
 		rocksideURL:    u,
 		network:        network,
 		logger:         log.New(ioutil.Discard, "", 0),
@@ -222,11 +257,11 @@ func decodeJSONErr(body io.Reader) (string, error) {
 	return v.Message, nil
 }
 
-type authTransport struct {
-	apiKey string
+type authenticatedHeaderTransport struct {
+	authFunc func(req *http.Request)
 }
 
-func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("apikey", t.apiKey)
+func (t *authenticatedHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.authFunc(req)
 	return http.DefaultTransport.RoundTrip(req)
 }

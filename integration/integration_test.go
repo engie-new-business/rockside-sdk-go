@@ -24,7 +24,7 @@ var (
 )
 
 func TestRockside(t *testing.T) {
-	client, err := rockside.NewClient(rocksideURL, os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
+	client, err := rockside.NewClientFromAPIKey(os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet, rocksideURL)
 	if err != nil {
 		t.Fatal(err)
 	}

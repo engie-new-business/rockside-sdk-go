@@ -108,7 +108,7 @@ var (
 				return fmt.Errorf("cannot deploy contract: %s (txhash=%s)", err, tx)
 			}
 
-			log.Printf("successfully deployed contract with receipt %s/tx/%s", RocksideClient().CurrentNetwork().EtherscanURL(), tx)
+			log.Printf("successfully deployed contract with receipt %s/tx/%s", RocksideClient().CurrentNetwork().ExplorerURL(), tx)
 
 			return nil
 		},

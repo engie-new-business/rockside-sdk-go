@@ -12,7 +12,7 @@ import (
 var rocksideClient *rockside.Client
 
 func ExampleNewClient() {
-	rocksideAPIclient, err := rockside.NewClient(os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
+	rocksideAPIclient, err := rockside.newClient(os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
 	if err != nil {
 		panic(err)
 	}
