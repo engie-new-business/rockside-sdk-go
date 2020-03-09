@@ -41,11 +41,11 @@ func (e *rpcError) Error() string {
 	return fmt.Sprintf("rpc error: %s (code=%d, url=%s)", e.Message, e.Code, e.endpoint)
 }
 
-func (r *RPCClient) SendTransactionFromIdentity(tx Transaction) (string, error) {
-	if err := tx.validateFields(); err != nil {
-		return "", err
-	}
+func (r *RPCClient) SendRocksideTransaction(tx Transaction) (string, error) {
+	return r.sendTransaction(tx)
+}
 
+func (r *RPCClient) SendTransactionFromIdentity(tx Transaction) (string, error) {
 	accounts, err := r.EthAccounts()
 	if err != nil {
 		return "", nil
@@ -61,20 +61,7 @@ func (r *RPCClient) SendTransactionFromIdentity(tx Transaction) (string, error) 
 		return "", fmt.Errorf("transaction 'from' address '%s' is not one of your existing Rockside identities", tx.From)
 	}
 
-	body := &rpcRequest{ID: 1, Version: "2.0",
-		Method: "eth_sendTransaction",
-		Params: []Transaction{tx},
-	}
-
-	resp := struct {
-		Result string `json:"result"`
-	}{}
-
-	if err := r.post(body, &resp); err != nil {
-		return "", err
-	}
-
-	return resp.Result, nil
+	return r.sendTransaction(tx)
 }
 
 func (r *RPCClient) EthAccounts() ([]string, error) {
@@ -92,6 +79,28 @@ func (r *RPCClient) EthAccounts() ([]string, error) {
 	}
 
 	return resp.Result, nil
+}
+
+func (r *RPCClient) sendTransaction(tx Transaction) (string, error) {
+	if err := tx.validateFields(); err != nil {
+		return "", err
+	}
+
+	body := &rpcRequest{ID: 1, Version: "2.0",
+		Method: "eth_sendTransaction",
+		Params: []Transaction{tx},
+	}
+
+	resp := struct {
+		Result string `json:"result"`
+	}{}
+
+	if err := r.post(body, &resp); err != nil {
+		return "", err
+	}
+
+	return resp.Result, nil
+
 }
 
 func (r *RPCClient) post(body interface{}, decode interface{}) error {
