@@ -11,8 +11,8 @@ import (
 
 var rocksideClient *rockside.Client
 
-func ExampleNewClient() {
-	rocksideAPIclient, err := rockside.newClient(os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
+func ExampleNewClientFromAPIKey() {
+	rocksideAPIclient, err := rockside.NewClientFromAPIKey(os.Getenv("ROCKSIDE_API_KEY"), rockside.Testnet)
 	if err != nil {
 		panic(err)
 	}

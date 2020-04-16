@@ -19,6 +19,8 @@ type RelayExecuteTxRequest struct {
 	To        string `json:"to"`
 	Value     string `json:"value"`
 	Data      string `json:"data"`
+	Gas       string `json:"gas"`
+	GasPrice  string `json:"gasPrice"`
 	Signature string `json:"signature"`
 }
 
@@ -75,7 +77,7 @@ func (e *RelayableIdentity) GetNonce(contractAddress string, account string) (no
 	return result, nil
 }
 
-func getHash(bouncer, signer, destination common.Address, value *big.Int, data []byte, nonce *big.Int, chainID *big.Int) ([]byte, error) {
+func getHash(identity, signer, destination common.Address, value *big.Int, data []byte, gas uint64, gasPrice *big.Int, nonce *big.Int, chainID *big.Int) ([]byte, error) {
 	EIP712DomainType := []gethSigner.Type{
 		{Name: "verifyingContract", Type: "address"},
 		{Name: "chainId", Type: "uint256"},
@@ -86,6 +88,8 @@ func getHash(bouncer, signer, destination common.Address, value *big.Int, data [
 		{Name: "to", Type: "address"},
 		{Name: "value", Type: "uint256"},
 		{Name: "data", Type: "bytes"},
+		{Name: "gasLimit", Type: "uint256"},
+		{Name: "gasPrice", Type: "uint256"},
 		{Name: "nonce", Type: "uint256"},
 	}
 
@@ -95,16 +99,18 @@ func getHash(bouncer, signer, destination common.Address, value *big.Int, data [
 	}
 
 	domainData := gethSigner.TypedDataDomain{
-		VerifyingContract: bouncer.String(),
+		VerifyingContract: identity.String(),
 		ChainId:           math.NewHexOrDecimal256(chainID.Int64()),
 	}
 
 	messageData := gethSigner.TypedDataMessage{
-		"signer": signer.String(),
-		"to":     destination.String(),
-		"value":  value.String(),
-		"data":   data,
-		"nonce":  nonce.String(),
+		"signer":   signer.String(),
+		"to":       destination.String(),
+		"value":    value.String(),
+		"data":     data,
+		"gasLimit": fmt.Sprintf("%d", gas),
+		"gasPrice": gasPrice.String(),
+		"nonce":    nonce.String(),
 	}
 
 	signerData := gethSigner.TypedData{
@@ -121,7 +127,7 @@ func getHash(bouncer, signer, destination common.Address, value *big.Int, data [
 	return crypto.Keccak256(rawData), nil
 }
 
-func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string) (string, error) {
+func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string, gas string, gasPrice string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
@@ -130,6 +136,16 @@ func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress st
 	valueInt, ok := math.ParseBig256(value)
 	if !ok {
 		return "", errors.New("error with provided value")
+	}
+
+	gasUint, ok := math.ParseUint64(gas)
+	if !ok {
+		return "", errors.New("error with provided gas")
+	}
+
+	gasPriceInt, ok := math.ParseBig256(value)
+	if !ok {
+		return "", errors.New("error with provided gasPrice")
 	}
 
 	nonceResponse, err := b.GetNonce(bouncerAddress, signer)
@@ -142,7 +158,7 @@ func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress st
 
 	network := b.client.CurrentNetwork()
 
-	argsHash, err := getHash(common.HexToAddress(bouncerAddress), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), bouncerNonce, network.ChainID())
+	argsHash, err := getHash(common.HexToAddress(bouncerAddress), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), gasUint, gasPriceInt, bouncerNonce, network.ChainID())
 	if err != nil {
 		return "", err
 	}

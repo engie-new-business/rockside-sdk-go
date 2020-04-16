@@ -208,7 +208,7 @@ func TestRockside(t *testing.T) {
 			})
 
 			t.Run("Relayable identity relay transaction", func(t *testing.T) {
-				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, fromAddress.String(), fromAddress.String(), "0", "")
+				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, fromAddress.String(), fromAddress.String(), "0", "", "0", "0")
 				if err != nil {
 					t.Fatal(err)
 				}

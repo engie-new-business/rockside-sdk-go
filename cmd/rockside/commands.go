@@ -175,7 +175,7 @@ var (
 				return err
 			}
 
-			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data)
+			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice)
 
 			if err != nil {
 				return err
