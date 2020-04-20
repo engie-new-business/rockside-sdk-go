@@ -21,6 +21,13 @@ func TransactOpts() *bind.TransactOpts {
 	return &bind.TransactOpts{Signer: noopSigner()}
 }
 
+func TransactOptsWithoutReward() *bind.TransactOpts {
+	return &bind.TransactOpts{
+		Signer:   noopSigner(),
+		GasPrice: big.NewInt(0),
+	}
+}
+
 func noopSigner() bind.SignerFn {
 	return func(s types.Signer, c common.Address, t *types.Transaction) (*types.Transaction, error) {
 		return t, nil
