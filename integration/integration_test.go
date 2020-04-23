@@ -208,7 +208,11 @@ func TestRockside(t *testing.T) {
 			})
 
 			t.Run("Relayable identity relay transaction", func(t *testing.T) {
-				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, fromAddress.String(), fromAddress.String(), "0", "", "0", "0")
+				nonce, err := client.RelayableIdentity.GetNonce(relayableIdentity.Address, fromAddress.String())
+				if err != nil {
+					t.Fatal(err)
+				}
+				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", nonce.Nonce)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -217,6 +221,7 @@ func TestRockside(t *testing.T) {
 					From:      fromAddress.String(),
 					To:        fromAddress.String(),
 					Signature: signature,
+					Nonce:     nonce.Nonce,
 				}
 				resp, err := client.RelayableIdentity.RelayExecute(relayableIdentity.Address, request)
 				if err != nil {
