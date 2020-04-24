@@ -80,8 +80,14 @@ func (e *RelayableIdentity) GetNonce(contractAddress string, account string, cha
 		return result, err
 	}
 
-	channelNonce, _ := new(big.Int).SetString(result.Nonce, 10)
-	channelBig, _ := new(big.Int).SetString(channel, 10)
+	channelNonce, isValidNonce := new(big.Int).SetString(result.Nonce, 10)
+	if !isValidNonce {
+		return nonceResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
+	}
+	channelBig, isValidChannel := new(big.Int).SetString(channel, 10)
+	if !isValidChannel {
+		return nonceResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
+	}
 	return nonceResponse{new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String()}, nil
 }
 
@@ -163,7 +169,10 @@ func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress st
 		}
 		nonce = nonceResponse.Nonce
 	}
-	nonceBig, _ := new(big.Int).SetString(nonce, 10)
+	nonceBig, isValidNonce := new(big.Int).SetString(nonce, 10)
+	if !isValidNonce {
+		return "", fmt.Errorf("nonce is not a valid number [%s]", nonce)
+	}
 
 	network := b.client.CurrentNetwork()
 
