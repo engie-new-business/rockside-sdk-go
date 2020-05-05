@@ -27,6 +27,7 @@ type RelayExecuteTxRequest struct {
 
 type relayTxResponse struct {
 	TransactionHash string `json:"transaction_hash"`
+	TrackingID      string `json:"tracking_id"`
 }
 
 type nonceResponse struct {
@@ -36,6 +37,7 @@ type nonceResponse struct {
 type createRelayableIdentityResponse struct {
 	Address         string `json:"address"`
 	TransactionHash string `json:"transaction_hash"`
+	TrackingID      string `json:"tracking_id"`
 }
 
 func (e *RelayableIdentity) Create(account string) (createRelayableIdentityResponse, error) {

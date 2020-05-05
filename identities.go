@@ -11,6 +11,7 @@ type Identities endpoint
 type createIdentitiesResponse struct {
 	Address         string `json:"address"`
 	TransactionHash string `json:"transaction_hash"`
+	TrackingID      string `json:"tracking_id"`
 }
 
 func (i *Identities) Create() (createIdentitiesResponse, error) {

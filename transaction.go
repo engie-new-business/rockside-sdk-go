@@ -22,6 +22,7 @@ type Transaction struct {
 
 type SendTxResponse struct {
 	TransactionHash string `json:"transaction_hash"`
+	TrackingID      string `json:"tracking_id"`
 }
 
 func (t *Transactions) Send(transaction Transaction) (SendTxResponse, error) {

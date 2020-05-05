@@ -24,6 +24,19 @@ func ExampleNewClientFromAPIKey() {
 	fmt.Println(identities)
 }
 
+func ExampleNewClientFromToken() {
+	rocksideAPIclient, err := rockside.NewClientFromToken("token", "example.com", rockside.Testnet)
+	if err != nil {
+		panic(err)
+	}
+
+	identities, err := rocksideAPIclient.Identities.List()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(identities)
+}
+
 func ExampleRPCClient() {
 	// Get a RPC client from your existing Rockside client.
 	rpc := rocksideClient.RPCClient
