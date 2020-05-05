@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"os"
 
 	"github.com/rocksideio/rockside-sdk-go"
@@ -34,8 +33,8 @@ var (
 			if err != nil {
 				return err
 			}
-			printJSON(eoaList)
-			return nil
+
+			return printJSON(eoaList)
 		},
 	}
 
@@ -47,8 +46,8 @@ var (
 			if err != nil {
 				return err
 			}
-			printJSON(eoa)
-			return nil
+
+			return printJSON(eoa)
 		},
 	}
 )
@@ -77,8 +76,8 @@ var (
 			if err != nil {
 				return err
 			}
-			printJSON(token)
-			return nil
+
+			return printJSON(token)
 		},
 	}
 )
@@ -99,8 +98,8 @@ var (
 			if err != nil {
 				return err
 			}
-			printJSON(identitiesList)
-			return nil
+
+			return printJSON(identitiesList)
 		},
 	}
 
@@ -112,8 +111,8 @@ var (
 			if err != nil {
 				return err
 			}
-			printJSON(identity)
-			return nil
+
+			return printJSON(identity)
 		},
 	}
 )
@@ -136,8 +135,8 @@ var (
 			if err != nil {
 				return err
 			}
-			printJSON(relayableidentity)
-			return nil
+
+			return printJSON(relayableidentity)
 		},
 	}
 
@@ -155,8 +154,8 @@ var (
 			if err != nil {
 				return err
 			}
-			printJSON(nonce)
-			return nil
+
+			return printJSON(nonce)
 		},
 	}
 
@@ -175,14 +174,13 @@ var (
 				return err
 			}
 
-			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice)
+			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice, tx.Nonce)
 
 			if err != nil {
 				return err
 			}
 
-			printJSON(signResponse)
-			return nil
+			return printJSON(signResponse)
 		},
 	}
 
@@ -206,8 +204,7 @@ var (
 				return err
 			}
 
-			printJSON(relayResponse)
-			return nil
+			return printJSON(relayResponse)
 		},
 	}
 )
@@ -224,8 +221,8 @@ var (
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("missing transaction payload {\"from\":\"\",\"to\":\"\", \"value\":\"\", gas:\"\", \"gasPrice\":\"\", \"nonce\":\"\"}")
-
 			}
+
 			txJSON := args[0]
 			tx := &rockside.Transaction{}
 			if err := json.Unmarshal([]byte(txJSON), tx); err != nil {
@@ -237,16 +234,29 @@ var (
 				return err
 			}
 
-			printJSON(txResponse)
-			return nil
+			return printJSON(txResponse)
+		},
+	}
+
+	showTxCmd = &cobra.Command{
+		Use:   "show",
+		Short: "show transaction given a tx hash or tracking ID",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("missing transaction hash or tracking ID")
+			}
+			result, err := RocksideClient().Transaction.Show(args[0])
+			if err != nil {
+				return err
+			}
+
+			return printJSON(result)
 		},
 	}
 )
 
-func printJSON(v interface{}) {
+func printJSON(v interface{}) error {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", " ")
-	if err := enc.Encode(v); err != nil {
-		log.Fatal(err)
-	}
+	return enc.Encode(v)
 }

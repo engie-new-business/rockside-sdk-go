@@ -143,7 +143,7 @@ func getHash(identity, signer, destination common.Address, value *big.Int, data 
 	return crypto.Keccak256(rawData), nil
 }
 
-func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress string, signer string, destination string, value string, data string, gas string, gasPrice string, nonce string) (string, error) {
+func (b *RelayableIdentity) SignTxParams(privateKeyStr, bouncerAddress, signer, destination, value, data, gas, gasPrice, nonce string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
@@ -159,7 +159,7 @@ func (b *RelayableIdentity) SignTxParams(privateKeyStr string, bouncerAddress st
 		return "", errors.New("error with provided gas")
 	}
 
-	gasPriceInt, ok := math.ParseBig256(value)
+	gasPriceInt, ok := math.ParseBig256(gasPrice)
 	if !ok {
 		return "", errors.New("error with provided gasPrice")
 	}
