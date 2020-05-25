@@ -197,7 +197,7 @@ func TestRockside(t *testing.T) {
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
 			t.Run("Relayable identity get nonce", func(t *testing.T) {
-				resp, err := client.RelayableIdentity.GetNonce(relayableIdentity.Address, fromAddress.String())
+				resp, err := client.RelayableIdentity.GetRelayParams(relayableIdentity.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -205,23 +205,28 @@ func TestRockside(t *testing.T) {
 				if got, want := resp.Nonce, "0"; got != want {
 					t.Fatalf("got %v, want %v", got, want)
 				}
+
+				if resp.Relayer == "0" || resp.Relayer == "0x0000000000000000000000000000000000000000" {
+					t.Fatalf("got empty relayer")
+				}
 			})
 
 			t.Run("Relayable identity relay transaction", func(t *testing.T) {
-				nonce, err := client.RelayableIdentity.GetNonce(relayableIdentity.Address, fromAddress.String())
+				params, err := client.RelayableIdentity.GetRelayParams(relayableIdentity.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
 				}
-				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", nonce.Nonce)
+				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, params.Relayer, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", params.Nonce)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				request := rockside.RelayExecuteTxRequest{
+					Relayer:   params.Relayer,
 					From:      fromAddress.String(),
 					To:        fromAddress.String(),
 					Signature: signature,
-					Nonce:     nonce.Nonce,
+					Nonce:     params.Nonce,
 				}
 				resp, err := client.RelayableIdentity.RelayExecute(relayableIdentity.Address, request)
 				if err != nil {
@@ -243,7 +248,7 @@ func exit(msg string) {
 
 func init() {
 	if len(rocksideURL) == 0 {
-		exit("missing ROCKSIDE_URL env variable")
+		exit("missing ROCKSIDE_API_URL env variable")
 	}
 
 	waitTime, exists := os.LookupEnv("BLOCK_WAIT_TIME")

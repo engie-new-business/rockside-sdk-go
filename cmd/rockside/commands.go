@@ -150,7 +150,7 @@ var (
 			contractAddress := args[0]
 			accountAddress := args[1]
 
-			nonce, err := RocksideClient().RelayableIdentity.GetNonce(contractAddress, accountAddress)
+			nonce, err := RocksideClient().RelayableIdentity.GetRelayParams(contractAddress, accountAddress)
 			if err != nil {
 				return err
 			}
@@ -174,7 +174,7 @@ var (
 				return err
 			}
 
-			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice, tx.Nonce)
+			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.Relayer, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice, tx.Nonce)
 
 			if err != nil {
 				return err

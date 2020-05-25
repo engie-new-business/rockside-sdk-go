@@ -15,6 +15,7 @@ import (
 type RelayableIdentity endpoint
 
 type RelayExecuteTxRequest struct {
+	Relayer   string `json:"relayer"`
 	From      string `json:"from"`
 	To        string `json:"to"`
 	Value     string `json:"value"`
@@ -30,8 +31,9 @@ type relayTxResponse struct {
 	TrackingID      string `json:"tracking_id"`
 }
 
-type nonceResponse struct {
-	Nonce string `json:"nonce"`
+type paramsResponse struct {
+	Nonce   string `json:"nonce"`
+	Relayer string `json:"relayer"`
 }
 
 type createRelayableIdentityResponse struct {
@@ -65,14 +67,14 @@ func (e *RelayableIdentity) RelayExecute(contractAddress string, request RelayEx
 	return result, nil
 }
 
-func (e *RelayableIdentity) GetNonce(contractAddress string, account string, channels ...string) (nonceResponse, error) {
+func (e *RelayableIdentity) GetRelayParams(contractAddress string, account string, channels ...string) (paramsResponse, error) {
 	channel := "0"
 	if len(channels) > 0 {
 		channel = channels[0]
 	}
-	var result nonceResponse
+	var result paramsResponse
 
-	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/nonce", e.client.network, contractAddress)
+	path := fmt.Sprintf("ethereum/%s/contracts/relayableidentity/%s/relayParams", e.client.network, contractAddress)
 	req := struct {
 		Account   string `json:"account"`
 		ChannelID string `json:"channel_id"`
@@ -84,22 +86,26 @@ func (e *RelayableIdentity) GetNonce(contractAddress string, account string, cha
 
 	channelNonce, isValidNonce := new(big.Int).SetString(result.Nonce, 10)
 	if !isValidNonce {
-		return nonceResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
+		return paramsResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
 	}
 	channelBig, isValidChannel := new(big.Int).SetString(channel, 10)
 	if !isValidChannel {
-		return nonceResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
+		return paramsResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
 	}
-	return nonceResponse{new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String()}, nil
+	return paramsResponse{
+		Nonce:   new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String(),
+		Relayer: result.Relayer,
+	}, nil
 }
 
-func getHash(identity, signer, destination common.Address, value *big.Int, data []byte, gas uint64, gasPrice *big.Int, nonce *big.Int, chainID *big.Int) ([]byte, error) {
+func getHash(identity, relayer, signer, destination common.Address, value *big.Int, data []byte, gas uint64, gasPrice *big.Int, nonce *big.Int, chainID *big.Int) ([]byte, error) {
 	EIP712DomainType := []gethSigner.Type{
 		{Name: "verifyingContract", Type: "address"},
 		{Name: "chainId", Type: "uint256"},
 	}
 
 	txMessageType := []gethSigner.Type{
+		{Name: "relayer", Type: "address"},
 		{Name: "signer", Type: "address"},
 		{Name: "to", Type: "address"},
 		{Name: "value", Type: "uint256"},
@@ -120,6 +126,7 @@ func getHash(identity, signer, destination common.Address, value *big.Int, data 
 	}
 
 	messageData := gethSigner.TypedDataMessage{
+		"relayer":  signer.String(),
 		"signer":   signer.String(),
 		"to":       destination.String(),
 		"value":    value.String(),
@@ -143,7 +150,7 @@ func getHash(identity, signer, destination common.Address, value *big.Int, data 
 	return crypto.Keccak256(rawData), nil
 }
 
-func (b *RelayableIdentity) SignTxParams(privateKeyStr, bouncerAddress, signer, destination, value, data, gas, gasPrice, nonce string) (string, error) {
+func (b *RelayableIdentity) SignTxParams(privateKeyStr, bouncerAddress, relayer, signer, destination, value, data, gas, gasPrice, nonce string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
@@ -164,12 +171,17 @@ func (b *RelayableIdentity) SignTxParams(privateKeyStr, bouncerAddress, signer, 
 		return "", errors.New("error with provided gasPrice")
 	}
 
-	if nonce == "" {
-		nonceResponse, err := b.GetNonce(bouncerAddress, signer)
+	if nonce == "" || relayer == "" {
+		paramsResponse, err := b.GetRelayParams(bouncerAddress, signer)
 		if err != nil {
 			return "", err
 		}
-		nonce = nonceResponse.Nonce
+		if nonce == "" {
+			nonce = paramsResponse.Nonce
+		}
+		if relayer == "" {
+			relayer = paramsResponse.Relayer
+		}
 	}
 	nonceBig, isValidNonce := new(big.Int).SetString(nonce, 10)
 	if !isValidNonce {
@@ -178,7 +190,7 @@ func (b *RelayableIdentity) SignTxParams(privateKeyStr, bouncerAddress, signer, 
 
 	network := b.client.CurrentNetwork()
 
-	argsHash, err := getHash(common.HexToAddress(bouncerAddress), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), gasUint, gasPriceInt, nonceBig, network.ChainID())
+	argsHash, err := getHash(common.HexToAddress(bouncerAddress), common.HexToAddress(relayer), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), gasUint, gasPriceInt, nonceBig, network.ChainID())
 	if err != nil {
 		return "", err
 	}

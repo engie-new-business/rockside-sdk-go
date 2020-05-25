@@ -11,6 +11,7 @@ import (
 type Transactions endpoint
 
 type Transaction struct {
+	Relayer  string `json:"relayer,omitempty"`
 	From     string `json:"from,omitempty"`
 	To       string `json:"to,omitempty"`
 	Value    string `json:"value,omitempty"`
