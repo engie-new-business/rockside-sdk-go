@@ -196,7 +196,7 @@ func TestRockside(t *testing.T) {
 			//Need to wait for contract deployment's transaction to be mined
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
-			t.Run("Relayable identity get nonce", func(t *testing.T) {
+			t.Run("Relayable identity get relay params", func(t *testing.T) {
 				resp, err := client.RelayableIdentity.GetRelayParams(relayableIdentity.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)

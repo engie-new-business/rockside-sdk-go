@@ -126,7 +126,7 @@ func getHash(identity, relayer, signer, destination common.Address, value *big.I
 	}
 
 	messageData := gethSigner.TypedDataMessage{
-		"relayer":  signer.String(),
+		"relayer":  relayer.String(),
 		"signer":   signer.String(),
 		"to":       destination.String(),
 		"value":    value.String(),
