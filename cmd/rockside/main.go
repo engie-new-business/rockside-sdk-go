@@ -32,7 +32,8 @@ func init() {
 
 	signCmd.PersistentFlags().StringVar(&privateKeyFlag, "privatekey", "", "privatekey")
 	signCmd.MarkPersistentFlagRequired("privatekey")
-	relayableIdentityCmd.AddCommand(deployRelayableIdentityCmd, getNonceCmd, signCmd, relayCmd)
+	relayableIdentityCmd.AddCommand(deployRelayableIdentityCmd)
+	forwarderCmd.AddCommand(getNonceCmd, signCmd, relayCmd)
 	transactionCmd.AddCommand(sentTxCmd, showTxCmd)
 	eoaCmd.AddCommand(listEOACmd, createEOACmd)
 	identitiesCmd.AddCommand(listIdentitiesCmd, createIdentitiesCmd)

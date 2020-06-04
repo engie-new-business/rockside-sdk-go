@@ -197,7 +197,7 @@ func TestRockside(t *testing.T) {
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
 			t.Run("Relayable identity get relay params", func(t *testing.T) {
-				resp, err := client.RelayableIdentity.GetRelayParams(relayableIdentity.Address, fromAddress.String())
+				resp, err := client.Forwarder.GetRelayParams(relayableIdentity.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -212,11 +212,11 @@ func TestRockside(t *testing.T) {
 			})
 
 			t.Run("Relayable identity relay transaction", func(t *testing.T) {
-				params, err := client.RelayableIdentity.GetRelayParams(relayableIdentity.Address, fromAddress.String())
+				params, err := client.Forwarder.GetRelayParams(relayableIdentity.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
 				}
-				signature, err := client.RelayableIdentity.SignTxParams(privateKeyString, relayableIdentity.Address, params.Relayer, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", params.Nonce)
+				signature, err := client.Forwarder.SignTxParams(privateKeyString, relayableIdentity.Address, params.Relayer, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", params.Nonce)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -228,7 +228,7 @@ func TestRockside(t *testing.T) {
 					Signature: signature,
 					Nonce:     params.Nonce,
 				}
-				resp, err := client.RelayableIdentity.RelayExecute(relayableIdentity.Address, request)
+				resp, err := client.Forwarder.Relay(relayableIdentity.Address, request)
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -118,25 +118,25 @@ var (
 )
 
 var (
-	relayableIdentityCmd = &cobra.Command{
-		Use:   "relayableidentity",
-		Short: "Manage relayable identities",
+	forwarderCmd = &cobra.Command{
+		Use:   "forwarder",
+		Short: "Manage forwarders",
 	}
 
-	deployRelayableIdentityCmd = &cobra.Command{
+	deployForwarder = &cobra.Command{
 		Use:   "deploy",
-		Short: "deploy a relayable identity",
+		Short: "deploy a forwarder",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("missing public address of the account")
 			}
 
-			relayableidentity, err := RocksideClient().RelayableIdentity.Create(args[0])
+			forwarder, err := RocksideClient().Forwarder.Create(args[0])
 			if err != nil {
 				return err
 			}
 
-			return printJSON(relayableidentity)
+			return printJSON(forwarder)
 		},
 	}
 
@@ -150,7 +150,7 @@ var (
 			contractAddress := args[0]
 			accountAddress := args[1]
 
-			nonce, err := RocksideClient().RelayableIdentity.GetRelayParams(contractAddress, accountAddress)
+			nonce, err := RocksideClient().Forwarder.GetRelayParams(contractAddress, accountAddress)
 			if err != nil {
 				return err
 			}
@@ -174,13 +174,37 @@ var (
 				return err
 			}
 
-			signResponse, err := RocksideClient().RelayableIdentity.SignTxParams(privateKeyFlag, contractAddress, tx.Relayer, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice, tx.Nonce)
+			signResponse, err := RocksideClient().Forwarder.SignTxParams(privateKeyFlag, contractAddress, tx.Relayer, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice, tx.Nonce)
 
 			if err != nil {
 				return err
 			}
 
 			return printJSON(signResponse)
+		},
+	}
+)
+
+var (
+	relayableIdentityCmd = &cobra.Command{
+		Use:   "relayableidentity",
+		Short: "Manage relayable identities",
+	}
+
+	deployRelayableIdentityCmd = &cobra.Command{
+		Use:   "deploy",
+		Short: "deploy a relayable identity",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("missing public address of the account")
+			}
+
+			relayableidentity, err := RocksideClient().RelayableIdentity.Create(args[0])
+			if err != nil {
+				return err
+			}
+
+			return printJSON(relayableidentity)
 		},
 	}
 
@@ -199,7 +223,7 @@ var (
 				return err
 			}
 
-			relayResponse, err := RocksideClient().RelayableIdentity.RelayExecute(contractAddress, *relayTx)
+			relayResponse, err := RocksideClient().Forwarder.Relay(contractAddress, *relayTx)
 			if err != nil {
 				return err
 			}
