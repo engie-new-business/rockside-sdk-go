@@ -161,7 +161,7 @@ func TestRockside(t *testing.T) {
 		})
 	})
 
-	t.Run("Contract", func(t *testing.T) {
+	t.Run("Forwarder contract", func(t *testing.T) {
 		t.Parallel()
 
 		privateKey, err := crypto.GenerateKey()
@@ -180,24 +180,24 @@ func TestRockside(t *testing.T) {
 
 		fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 
-		t.Run("Create relayable identity", func(t *testing.T) {
-			relayableIdentity, err := client.RelayableIdentity.Create(fromAddress.String())
+		t.Run("Create contract", func(t *testing.T) {
+			forwarder, err := client.Forwarder.Create(fromAddress.String())
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if got, want := len(relayableIdentity.Address), 42; got != want {
+			if got, want := len(forwarder.Address), 42; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
-			if got, want := len(relayableIdentity.TransactionHash), 66; got != want {
+			if got, want := len(forwarder.TransactionHash), 66; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 
 			//Need to wait for contract deployment's transaction to be mined
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
-			t.Run("Relayable identity get relay params", func(t *testing.T) {
-				resp, err := client.Forwarder.GetRelayParams(relayableIdentity.Address, fromAddress.String())
+			t.Run("Get relay params", func(t *testing.T) {
+				resp, err := client.Forwarder.GetRelayParams(forwarder.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -211,24 +211,26 @@ func TestRockside(t *testing.T) {
 				}
 			})
 
-			t.Run("Relayable identity relay transaction", func(t *testing.T) {
-				params, err := client.Forwarder.GetRelayParams(relayableIdentity.Address, fromAddress.String())
+			t.Run("Relay transaction", func(t *testing.T) {
+				params, err := client.Forwarder.GetRelayParams(forwarder.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
 				}
-				signature, err := client.Forwarder.SignTxParams(privateKeyString, relayableIdentity.Address, params.Relayer, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", params.Nonce)
+				signature, err := client.Forwarder.SignTxParams(privateKeyString, forwarder.Address, params.Relayer, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", params.Nonce)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				request := rockside.RelayExecuteTxRequest{
-					Relayer:   params.Relayer,
-					From:      fromAddress.String(),
-					To:        fromAddress.String(),
-					Signature: signature,
-					Nonce:     params.Nonce,
+					Relayer:       params.Relayer,
+					From:          fromAddress.String(),
+					To:            fromAddress.String(),
+					Signature:     signature,
+					Nonce:         params.Nonce,
+					GasPriceLimit: "30000000000",
+					Speed:         "standard",
 				}
-				resp, err := client.Forwarder.Relay(relayableIdentity.Address, request)
+				resp, err := client.Forwarder.Relay(forwarder.Address, request)
 				if err != nil {
 					t.Fatal(err)
 				}

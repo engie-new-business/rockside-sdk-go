@@ -213,7 +213,7 @@ var (
 		Short: "relay transaction",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
-				return errors.New("missing contract address and transaction payload {\"from\":\"\", \"to\":\"\" \"value\":\"\", \"data\":\"\", \"signature\":\"\"}")
+				return errors.New("missing contract address and transaction payload {\"from\":\"\", \"to\":\"\", \"value\":\"\", \"speed\":\"\", \"gas_price_limit\":\"\", \"data\":\"\", \"signature\":\"\"}")
 			}
 
 			contractAddress := args[0]

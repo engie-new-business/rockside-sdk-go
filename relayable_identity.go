@@ -7,15 +7,16 @@ import (
 type RelayableIdentity endpoint
 
 type RelayExecuteTxRequest struct {
-	Relayer   string `json:"relayer"`
-	From      string `json:"from"`
-	To        string `json:"to"`
-	Value     string `json:"value"`
-	Data      string `json:"data"`
-	Gas       string `json:"gas"`
-	GasPrice  string `json:"gasPrice"`
-	Nonce     string `json:"nonce"`
-	Signature string `json:"signature"`
+	Relayer       string `json:"relayer"`
+	From          string `json:"from"`
+	To            string `json:"to"`
+	Value         string `json:"value"`
+	Data          string `json:"data"`
+	Gas           string `json:"gas"`
+	GasPriceLimit string `json:"gas_price_limit"`
+	Speed         string `json:"speed"`
+	Nonce         string `json:"nonce"`
+	Signature     string `json:"signature"`
 }
 
 type relayTxResponse struct {

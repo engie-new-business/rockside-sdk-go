@@ -82,6 +82,10 @@ func (e *Forwarder) GetRelayParams(contractAddress string, account string, chann
 func (e *Forwarder) Relay(contractAddress string, request RelayExecuteTxRequest) (relayTxResponse, error) {
 	var result relayTxResponse
 
+	if request.Speed == "" {
+		request.Speed = "standard"
+	}
+
 	path := fmt.Sprintf("ethereum/%s/%s/relay", e.client.network, contractAddress)
 	if _, err := e.client.post(path, request, &result); err != nil {
 		return result, err
