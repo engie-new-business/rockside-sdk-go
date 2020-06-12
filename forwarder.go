@@ -20,13 +20,39 @@ type CreateForwarderResponse struct {
 	TrackingID      string `json:"tracking_id"`
 }
 
+type RelayParamsResponse struct {
+	Nonce string `json:"nonce"`
+}
+
+type RelayExecuteTxData struct {
+	Signer        string `json:"signer"`
+	To            string `json:"to"`
+	Value         string `json:"value"`
+	Data          string `json:"data"`
+	Gas           string `json:"gas"`
+	GasPriceLimit string `json:"gas_price_limit"`
+	Nonce         string `json:"nonce"`
+}
+
+type RelayExecuteTxRequest struct {
+	DestinationContract string             `json:"destination_contract"`
+	Speed               string             `json:"speed"`
+	Data                RelayExecuteTxData `json:"data"`
+	Signature           string             `json:"signature"`
+}
+
+type RelayTxResponse struct {
+	TransactionHash string `json:"transaction_hash"`
+	TrackingID      string `json:"tracking_id"`
+}
+
 func (e *Forwarder) Create(owner string) (CreateForwarderResponse, error) {
 	req := struct {
 		Owner string `json:"owner"`
 	}{owner}
 
 	var result CreateForwarderResponse
-	path := fmt.Sprintf("ethereum/%s/forwarder", e.client.network)
+	path := fmt.Sprintf("ethereum/%s/forwarders", e.client.network)
 	if _, err := e.client.post(path, req, &result); err != nil {
 		return result, err
 	}
@@ -34,28 +60,28 @@ func (e *Forwarder) Create(owner string) (CreateForwarderResponse, error) {
 	return result, nil
 }
 
-func (e *Forwarder) Get() (string, error) {
+func (e *Forwarder) Get() ([]string, error) {
 	type response struct {
 		Address string `json:"address"`
 	}
 
-	var result response
-	path := fmt.Sprintf("ethereum/%s/forwarder", e.client.network)
+	var result []string
+	path := fmt.Sprintf("ethereum/%s/forwarders", e.client.network)
 	if _, err := e.client.get(path, nil, &result); err != nil {
-		return result.Address, err
+		return result, err
 	}
 
-	return result.Address, nil
+	return result, nil
 }
 
-func (e *Forwarder) GetRelayParams(contractAddress string, account string, channels ...string) (paramsResponse, error) {
+func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, channels ...string) (RelayParamsResponse, error) {
 	channel := "0"
 	if len(channels) > 0 {
 		channel = channels[0]
 	}
-	var result paramsResponse
+	var result RelayParamsResponse
 
-	path := fmt.Sprintf("ethereum/%s/%s/relayParams", e.client.network, contractAddress)
+	path := fmt.Sprintf("ethereum/%s/%s/relayParams", e.client.network, forwarderAddress)
 	req := struct {
 		Account   string `json:"account"`
 		ChannelID string `json:"channel_id"`
@@ -67,26 +93,25 @@ func (e *Forwarder) GetRelayParams(contractAddress string, account string, chann
 
 	channelNonce, isValidNonce := new(big.Int).SetString(result.Nonce, 10)
 	if !isValidNonce {
-		return paramsResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
+		return RelayParamsResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
 	}
 	channelBig, isValidChannel := new(big.Int).SetString(channel, 10)
 	if !isValidChannel {
-		return paramsResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
+		return RelayParamsResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
 	}
-	return paramsResponse{
-		Nonce:   new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String(),
-		Relayer: result.Relayer,
+	return RelayParamsResponse{
+		Nonce: new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String(),
 	}, nil
 }
 
-func (e *Forwarder) Relay(contractAddress string, request RelayExecuteTxRequest) (relayTxResponse, error) {
-	var result relayTxResponse
+func (e *Forwarder) Relay(forwarderAddress string, request RelayExecuteTxRequest) (RelayTxResponse, error) {
+	var result RelayTxResponse
 
 	if request.Speed == "" {
 		request.Speed = "standard"
 	}
 
-	path := fmt.Sprintf("ethereum/%s/%s/relay", e.client.network, contractAddress)
+	path := fmt.Sprintf("ethereum/%s/forwarders/%s", e.client.network, forwarderAddress)
 	if _, err := e.client.post(path, request, &result); err != nil {
 		return result, err
 	}
@@ -122,9 +147,6 @@ func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, relayer, signer,
 		}
 		if nonce == "" {
 			nonce = paramsResponse.Nonce
-		}
-		if relayer == "" {
-			relayer = paramsResponse.Relayer
 		}
 	}
 	nonceBig, isValidNonce := new(big.Int).SetString(nonce, 10)
