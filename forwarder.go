@@ -25,18 +25,17 @@ type RelayParamsResponse struct {
 }
 
 type RelayExecuteTxData struct {
-	Signer        string `json:"signer"`
-	To            string `json:"to"`
-	Value         string `json:"value"`
-	Data          string `json:"data"`
-	Gas           string `json:"gas"`
-	GasPriceLimit string `json:"gas_price_limit"`
-	Nonce         string `json:"nonce"`
+	Signer string `json:"signer"`
+	To     string `json:"to"`
+	Value  string `json:"value"`
+	Data   string `json:"data"`
+	Nonce  string `json:"nonce"`
 }
 
 type RelayExecuteTxRequest struct {
 	DestinationContract string             `json:"destination_contract"`
 	Speed               string             `json:"speed"`
+	GasPriceLimit       string             `json:"gas_price_limit"`
 	Data                RelayExecuteTxData `json:"data"`
 	Signature           string             `json:"signature"`
 }
@@ -119,7 +118,7 @@ func (e *Forwarder) Relay(forwarderAddress string, request RelayExecuteTxRequest
 	return result, nil
 }
 
-func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, relayer, signer, destination, value, data, gas, gasPrice, nonce string) (string, error) {
+func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, signer, destination, value, data, nonce string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
@@ -130,17 +129,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, relayer, signer,
 		return "", errors.New("error with provided value")
 	}
 
-	gasUint, ok := math.ParseUint64(gas)
-	if !ok {
-		return "", errors.New("error with provided gas")
-	}
-
-	gasPriceInt, ok := math.ParseBig256(gasPrice)
-	if !ok {
-		return "", errors.New("error with provided gasPrice")
-	}
-
-	if nonce == "" || relayer == "" {
+	if nonce == "" {
 		paramsResponse, err := e.GetRelayParams(bouncerAddress, signer)
 		if err != nil {
 			return "", err
@@ -156,7 +145,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, relayer, signer,
 
 	network := e.client.CurrentNetwork()
 
-	argsHash, err := getHash(common.HexToAddress(bouncerAddress), common.HexToAddress(relayer), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), gasUint, gasPriceInt, nonceBig, network.ChainID())
+	argsHash, err := getHash(common.HexToAddress(bouncerAddress), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), nonceBig, network.ChainID())
 	if err != nil {
 		return "", err
 	}
@@ -169,20 +158,17 @@ func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, relayer, signer,
 	return hexutil.Encode(signedHash), nil
 }
 
-func getHash(identity, relayer, signer, destination common.Address, value *big.Int, data []byte, gas uint64, gasPrice *big.Int, nonce *big.Int, chainID *big.Int) ([]byte, error) {
+func getHash(identity, signer, destination common.Address, value *big.Int, data []byte, nonce *big.Int, chainID *big.Int) ([]byte, error) {
 	EIP712DomainType := []gethSigner.Type{
 		{Name: "verifyingContract", Type: "address"},
 		{Name: "chainId", Type: "uint256"},
 	}
 
 	txMessageType := []gethSigner.Type{
-		{Name: "relayer", Type: "address"},
 		{Name: "signer", Type: "address"},
 		{Name: "to", Type: "address"},
 		{Name: "value", Type: "uint256"},
 		{Name: "data", Type: "bytes"},
-		{Name: "gasLimit", Type: "uint256"},
-		{Name: "gasPrice", Type: "uint256"},
 		{Name: "nonce", Type: "uint256"},
 	}
 
@@ -197,14 +183,11 @@ func getHash(identity, relayer, signer, destination common.Address, value *big.I
 	}
 
 	messageData := gethSigner.TypedDataMessage{
-		"relayer":  relayer.String(),
-		"signer":   signer.String(),
-		"to":       destination.String(),
-		"value":    value.String(),
-		"data":     data,
-		"gasLimit": fmt.Sprintf("%d", gas),
-		"gasPrice": gasPrice.String(),
-		"nonce":    nonce.String(),
+		"signer": signer.String(),
+		"to":     destination.String(),
+		"value":  value.String(),
+		"data":   data,
+		"nonce":  nonce.String(),
 	}
 
 	signerData := gethSigner.TypedData{
