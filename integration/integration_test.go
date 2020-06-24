@@ -33,15 +33,25 @@ func TestRockside(t *testing.T) {
 		t.Parallel()
 
 		t.Run("create", func(t *testing.T) {
-			resp, err := client.Identities.Create()
+			eoa, err := client.EOA.Create()
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if got, want := len(resp.Address), 42; got != want {
+			forwarder, err := client.Forwarder.Create(eoa.Address)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			identity, err := client.Identities.Create(eoa.Address, forwarder.Address)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if got, want := len(identity.Address), 42; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
-			if got, want := len(resp.TransactionHash), 66; got != want {
+			if got, want := len(identity.TransactionHash), 66; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 		})
@@ -57,7 +67,17 @@ func TestRockside(t *testing.T) {
 				t.Fatalf("expect response length %v greater than 0", initialNumberOfEOA)
 			}
 
-			created, err := client.Identities.Create()
+			eoa, err := client.EOA.Create()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			forwarder, err := client.Forwarder.Create(eoa.Address)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			created, err := client.Identities.Create(eoa.Address, forwarder.Address)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -88,7 +108,17 @@ func TestRockside(t *testing.T) {
 		t.Parallel()
 
 		t.Run("Send transaction from identity", func(t *testing.T) {
-			response, err := client.Identities.Create()
+			eoa, err := client.EOA.Create()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			forwarder, err := client.Forwarder.Create(eoa.Address)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			identity, err := client.Identities.Create(eoa.Address, forwarder.Address)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -96,7 +126,7 @@ func TestRockside(t *testing.T) {
 			//Need to wait for contract deployment's transaction to be mined
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
-			tx := rockside.Transaction{From: response.Address, To: response.Address, Value: "0x0"}
+			tx := rockside.Transaction{From: identity.Address, To: identity.Address, Value: "0x0"}
 			txResponse, err := client.Transaction.Send(tx)
 			if err != nil {
 				t.Fatal(err)
@@ -219,10 +249,18 @@ func TestRockside(t *testing.T) {
 
 				request := rockside.RelayExecuteTxRequest{
 					DestinationContract: fromAddress.String(),
-					Signature:           signature,
-					GasPriceLimit:       "30000000000",
 					Speed:               "standard",
+					GasPriceLimit:       "30000000000",
+					Signature:           signature,
+					Data: rockside.RelayExecuteTxData{
+						Signer: fromAddress.String(),
+						To:     fromAddress.String(),
+						Value:  "0",
+						Data:   "",
+						Nonce:  params.Nonce,
+					},
 				}
+
 				resp, err := client.Forwarder.Relay(forwarder.Address, request)
 				if err != nil {
 					t.Fatal(err)

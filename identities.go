@@ -14,11 +14,15 @@ type createIdentitiesResponse struct {
 	TrackingID      string `json:"tracking_id"`
 }
 
-func (i *Identities) Create() (createIdentitiesResponse, error) {
+func (i *Identities) Create(account, forwarder string) (createIdentitiesResponse, error) {
 	var result createIdentitiesResponse
 
 	path := fmt.Sprintf("ethereum/%s/identities", i.client.network)
-	if _, err := i.client.post(path, nil, &result); err != nil {
+	req := struct {
+		Account   string `json:"account"`
+		Forwarder string `json:"forwarder"`
+	}{account, forwarder}
+	if _, err := i.client.post(path, req, &result); err != nil {
 		return result, err
 	}
 

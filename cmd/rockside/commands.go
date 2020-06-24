@@ -104,10 +104,14 @@ var (
 	}
 
 	createIdentitiesCmd = &cobra.Command{
-		Use:   "create",
-		Short: "Create an identity",
+		Use:   "deploy",
+		Short: "deploy a relayable identity given the account address and forwarder address",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			identity, err := RocksideClient().Identities.Create()
+			if len(args) < 2 {
+				return errors.New("missing public address of the account and/or forwarder address")
+			}
+
+			identity, err := RocksideClient().Identities.Create(args[0], args[1])
 			if err != nil {
 				return err
 			}
@@ -181,30 +185,6 @@ var (
 			}
 
 			return printJSON(signResponse)
-		},
-	}
-)
-
-var (
-	relayableIdentityCmd = &cobra.Command{
-		Use:   "relayableidentity",
-		Short: "Manage relayable identities",
-	}
-
-	deployRelayableIdentityCmd = &cobra.Command{
-		Use:   "deploy",
-		Short: "deploy a relayable identity given the account address and forwarder address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 2 {
-				return errors.New("missing public address of the account and/or forwarder address")
-			}
-
-			relayableidentity, err := RocksideClient().RelayableIdentity.Create(args[0], args[1])
-			if err != nil {
-				return err
-			}
-
-			return printJSON(relayableidentity)
 		},
 	}
 

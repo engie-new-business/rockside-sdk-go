@@ -32,7 +32,6 @@ func init() {
 
 	signCmd.PersistentFlags().StringVar(&privateKeyFlag, "privatekey", "", "privatekey")
 	signCmd.MarkPersistentFlagRequired("privatekey")
-	relayableIdentityCmd.AddCommand(deployRelayableIdentityCmd)
 	forwarderCmd.AddCommand(getNonceCmd, signCmd, relayCmd)
 	transactionCmd.AddCommand(sentTxCmd, showTxCmd)
 	eoaCmd.AddCommand(listEOACmd, createEOACmd)
@@ -45,7 +44,7 @@ func init() {
 	deployContractCmd.PersistentFlags().BoolVar(&printContractCreationBinFlag, "print-creation-bin", false, "Compile, print contract creation bytecode and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&compileContractOnlyFlag, "compile-only", false, "Compile without deploying and exit")
 
-	rootCmd.AddCommand(eoaCmd, identitiesCmd, relayableIdentityCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd, tokensCmd)
+	rootCmd.AddCommand(eoaCmd, identitiesCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd, tokensCmd)
 }
 
 func RocksideClient() *rockside.Client {
