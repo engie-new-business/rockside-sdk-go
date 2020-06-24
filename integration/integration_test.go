@@ -205,10 +205,6 @@ func TestRockside(t *testing.T) {
 				if got, want := resp.Nonce, "0"; got != want {
 					t.Fatalf("got %v, want %v", got, want)
 				}
-
-				if resp.Relayer == "0" || resp.Relayer == "0x0000000000000000000000000000000000000000" {
-					t.Fatalf("got empty relayer")
-				}
 			})
 
 			t.Run("Relay transaction", func(t *testing.T) {
@@ -216,19 +212,16 @@ func TestRockside(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				signature, err := client.Forwarder.SignTxParams(privateKeyString, forwarder.Address, params.Relayer, fromAddress.String(), fromAddress.String(), "0", "", "0", "0", params.Nonce)
+				signature, err := client.Forwarder.SignTxParams(privateKeyString, forwarder.Address, fromAddress.String(), fromAddress.String(), "0", "", params.Nonce)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				request := rockside.RelayExecuteTxRequest{
-					Relayer:       params.Relayer,
-					From:          fromAddress.String(),
-					To:            fromAddress.String(),
-					Signature:     signature,
-					Nonce:         params.Nonce,
-					GasPriceLimit: "30000000000",
-					Speed:         "standard",
+					DestinationContract: fromAddress.String(),
+					Signature:           signature,
+					GasPriceLimit:       "30000000000",
+					Speed:               "standard",
 				}
 				resp, err := client.Forwarder.Relay(forwarder.Address, request)
 				if err != nil {

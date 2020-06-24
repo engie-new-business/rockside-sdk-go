@@ -21,7 +21,8 @@ type CreateForwarderResponse struct {
 }
 
 type RelayParamsResponse struct {
-	Nonce string `json:"nonce"`
+	Nonce     string            `json:"nonce"`
+	GasPrices map[string]string `json:"gas_prices"`
 }
 
 type RelayExecuteTxData struct {
@@ -60,10 +61,6 @@ func (e *Forwarder) Create(owner string) (CreateForwarderResponse, error) {
 }
 
 func (e *Forwarder) Get() ([]string, error) {
-	type response struct {
-		Address string `json:"address"`
-	}
-
 	var result []string
 	path := fmt.Sprintf("ethereum/%s/forwarders", e.client.network)
 	if _, err := e.client.get(path, nil, &result); err != nil {
@@ -80,7 +77,7 @@ func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, chan
 	}
 	var result RelayParamsResponse
 
-	path := fmt.Sprintf("ethereum/%s/%s/relayParams", e.client.network, forwarderAddress)
+	path := fmt.Sprintf("ethereum/%s/forwarders/%s/relayParams", e.client.network, forwarderAddress)
 	req := struct {
 		Account   string `json:"account"`
 		ChannelID string `json:"channel_id"`

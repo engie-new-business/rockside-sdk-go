@@ -174,7 +174,7 @@ var (
 				return err
 			}
 
-			signResponse, err := RocksideClient().Forwarder.SignTxParams(privateKeyFlag, contractAddress, tx.Relayer, tx.From, tx.To, tx.Value, tx.Data, tx.Gas, tx.GasPrice, tx.Nonce)
+			signResponse, err := RocksideClient().Forwarder.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data, tx.Nonce)
 
 			if err != nil {
 				return err
@@ -193,13 +193,13 @@ var (
 
 	deployRelayableIdentityCmd = &cobra.Command{
 		Use:   "deploy",
-		Short: "deploy a relayable identity",
+		Short: "deploy a relayable identity given the account address and forwarder address",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return errors.New("missing public address of the account")
+			if len(args) < 2 {
+				return errors.New("missing public address of the account and/or forwarder address")
 			}
 
-			relayableidentity, err := RocksideClient().RelayableIdentity.Create(args[0])
+			relayableidentity, err := RocksideClient().RelayableIdentity.Create(args[0], args[1])
 			if err != nil {
 				return err
 			}
