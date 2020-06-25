@@ -115,7 +115,7 @@ func (e *Forwarder) Relay(forwarderAddress string, request RelayExecuteTxRequest
 	return result, nil
 }
 
-func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, signer, destination, value, data, nonce string) (string, error) {
+func (e *Forwarder) SignTxParams(privateKeyStr, contract, signer, destination, value, data, nonce string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
@@ -127,7 +127,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, signer, destinat
 	}
 
 	if nonce == "" {
-		paramsResponse, err := e.GetRelayParams(bouncerAddress, signer)
+		paramsResponse, err := e.GetRelayParams(contract, signer)
 		if err != nil {
 			return "", err
 		}
@@ -142,7 +142,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, bouncerAddress, signer, destinat
 
 	network := e.client.CurrentNetwork()
 
-	argsHash, err := getHash(common.HexToAddress(bouncerAddress), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), nonceBig, network.ChainID())
+	argsHash, err := getHash(common.HexToAddress(contract), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), nonceBig, network.ChainID())
 	if err != nil {
 		return "", err
 	}

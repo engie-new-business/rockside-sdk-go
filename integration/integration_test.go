@@ -210,7 +210,7 @@ func TestRockside(t *testing.T) {
 
 		fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 
-		t.Run("Create contract", func(t *testing.T) {
+		t.Run("deploy forwarder", func(t *testing.T) {
 			forwarder, err := client.Forwarder.Create(fromAddress.String())
 			if err != nil {
 				t.Fatal(err)
@@ -220,6 +220,18 @@ func TestRockside(t *testing.T) {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 			if got, want := len(forwarder.TransactionHash), 66; got != want {
+				t.Fatalf("got %v, want %v", got, want)
+			}
+
+			identity, err := client.Identities.Create(fromAddress.String(), forwarder.Address)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if got, want := len(identity.Address), 42; got != want {
+				t.Fatalf("got %v, want %v", got, want)
+			}
+			if got, want := len(identity.TransactionHash), 66; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 
@@ -242,19 +254,19 @@ func TestRockside(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				signature, err := client.Forwarder.SignTxParams(privateKeyString, forwarder.Address, fromAddress.String(), fromAddress.String(), "0", "", params.Nonce)
+				signature, err := client.Forwarder.SignTxParams(privateKeyString, identity.Address, fromAddress.String(), "0x0000000000000000000000000000000000000000", "0", "", params.Nonce)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				request := rockside.RelayExecuteTxRequest{
-					DestinationContract: fromAddress.String(),
+					DestinationContract: identity.Address,
 					Speed:               "standard",
 					GasPriceLimit:       "30000000000",
 					Signature:           signature,
 					Data: rockside.RelayExecuteTxData{
 						Signer: fromAddress.String(),
-						To:     fromAddress.String(),
+						To:     "0x0000000000000000000000000000000000000000",
 						Value:  "0",
 						Data:   "",
 						Nonce:  params.Nonce,
