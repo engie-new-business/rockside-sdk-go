@@ -13,11 +13,12 @@ var (
 	envRocksideTokenOrigin = os.Getenv("ROCKSIDE_TOKEN_ORIGIN")
 	envRocksideAPIURL      = os.Getenv("ROCKSIDE_API_URL")
 
-	rocksideTokenOrigin, rocksideURLFlag                  string
-	privateKeyFlag, identityToDeployContractFlag          string
-	testnetFlag, verboseFlag                              bool
-	printContractABIFlag, printContractRuntimeBinFlag     bool
-	compileContractOnlyFlag, printContractCreationBinFlag bool
+	rocksideTokenOrigin, rocksideURLFlag                       string
+	privateKeyFlag, identityToDeployContractFlag               string
+	forwaderAddressFlag, rocksideEOAFlag, rocksideIdentityFlag string
+	testnetFlag, verboseFlag                                   bool
+	printContractABIFlag, printContractRuntimeBinFlag          bool
+	compileContractOnlyFlag, printContractCreationBinFlag      bool
 )
 
 func init() {
@@ -29,12 +30,14 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&rocksideTokenOrigin, "token-origin", envRocksideTokenOrigin, "Origin associated with token")
 	rootCmd.PersistentFlags().BoolVar(&testnetFlag, "testnet", false, "Use testnet (Ropsten) instead of mainnet")
 	rootCmd.PersistentFlags().BoolVar(&verboseFlag, "verbose", false, "Verbose Rockside client")
+	rootCmd.PersistentFlags().StringVar(&rocksideEOAFlag, "rockside-eoa", "", "Rockside existing custodian EOA public hexadecimal address")
+	rootCmd.PersistentFlags().StringVar(&rocksideIdentityFlag, "rockside-identity", "", "Rockside existing identity public hexadecimal address")
 
-	signCmd.PersistentFlags().StringVar(&privateKeyFlag, "privatekey", "", "privatekey")
-	signCmd.MarkPersistentFlagRequired("privatekey")
-	forwarderCmd.AddCommand(getNonceCmd, signCmd, relayCmd)
-	transactionCmd.AddCommand(sentTxCmd, showTxCmd)
-	eoaCmd.AddCommand(listEOACmd, createEOACmd)
+	signTransactionCmd.PersistentFlags().StringVar(&privateKeyFlag, "private-key", "", "Private key (not recommended as it displays in the CLI history)")
+	forwarderCmd.PersistentFlags().StringVar(&forwaderAddressFlag, "forwarder", "", "Address of your deployed forwarder")
+	forwarderCmd.AddCommand(createForwarderCmd, getForwarderParamsCmd, signTransactionCmd, forwardTransactionCmd, listForwardersCmd, sendTestTransactionCmd)
+	transactionCmd.AddCommand(sentTxCmd, showTxCmd, listTxCmd)
+	eoaCmd.AddCommand(listEOACmd, createEOACmd, signMessageWithEOACmd)
 	identitiesCmd.AddCommand(listIdentitiesCmd, createIdentitiesCmd)
 	tokensCmd.AddCommand(createTokenCmd)
 
@@ -44,7 +47,7 @@ func init() {
 	deployContractCmd.PersistentFlags().BoolVar(&printContractCreationBinFlag, "print-creation-bin", false, "Compile, print contract creation bytecode and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&compileContractOnlyFlag, "compile-only", false, "Compile without deploying and exit")
 
-	rootCmd.AddCommand(eoaCmd, identitiesCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd, tokensCmd)
+	rootCmd.AddCommand(eoaCmd, identitiesCmd, transactionCmd, deployContractCmd, forwarderCmd, rpcCmd, showReceiptCmd, tokensCmd)
 }
 
 func RocksideClient() *rockside.Client {

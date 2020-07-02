@@ -38,7 +38,7 @@ func ExampleNewClientFromToken() {
 }
 
 func ExampleRPCClient() {
-	// Get a RPC client from your existing Rockside client.
+	// List a RPC client from your existing Rockside client.
 	rpc := rocksideClient.RPCClient
 
 	accounts, err := rpc.EthAccounts()

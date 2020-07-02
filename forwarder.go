@@ -60,7 +60,7 @@ func (e *Forwarder) Create(owner string) (CreateForwarderResponse, error) {
 	return result, nil
 }
 
-func (e *Forwarder) Get() ([]string, error) {
+func (e *Forwarder) List() ([]string, error) {
 	var result []string
 	path := fmt.Sprintf("ethereum/%s/forwarders", e.client.network)
 	if _, err := e.client.get(path, nil, &result); err != nil {
@@ -100,7 +100,7 @@ func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, chan
 	}, nil
 }
 
-func (e *Forwarder) Relay(forwarderAddress string, request RelayExecuteTxRequest) (RelayTxResponse, error) {
+func (e *Forwarder) Forward(forwarderAddress string, request RelayExecuteTxRequest) (RelayTxResponse, error) {
 	var result RelayTxResponse
 
 	if request.Speed == "" {
@@ -115,19 +115,16 @@ func (e *Forwarder) Relay(forwarderAddress string, request RelayExecuteTxRequest
 	return result, nil
 }
 
-func (e *Forwarder) SignTxParams(privateKeyStr, contract, signer, destination, value, data, nonce string) (string, error) {
-	privateKey, err := crypto.HexToECDSA(privateKeyStr)
-	if err != nil {
-		return "", err
-	}
+type SignFunc func([]byte) ([]byte, error)
 
+func (e *Forwarder) SignTxParams(sign SignFunc, contract, account, destination, value, data, nonce string) (string, error) {
 	valueInt, ok := math.ParseBig256(value)
 	if !ok {
 		return "", errors.New("error with provided value")
 	}
 
 	if nonce == "" {
-		paramsResponse, err := e.GetRelayParams(contract, signer)
+		paramsResponse, err := e.GetRelayParams(contract, account)
 		if err != nil {
 			return "", err
 		}
@@ -140,19 +137,17 @@ func (e *Forwarder) SignTxParams(privateKeyStr, contract, signer, destination, v
 		return "", fmt.Errorf("nonce is not a valid number [%s]", nonce)
 	}
 
-	network := e.client.CurrentNetwork()
-
-	argsHash, err := getHash(common.HexToAddress(contract), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), nonceBig, network.ChainID())
+	hash, err := getHash(common.HexToAddress(contract), common.HexToAddress(account), common.HexToAddress(destination), valueInt, common.FromHex(data), nonceBig, e.client.CurrentNetwork().ChainID())
 	if err != nil {
 		return "", err
 	}
 
-	signedHash, err := crypto.Sign(argsHash, privateKey)
+	signed, err := sign(hash)
 	if err != nil {
 		return "", err
 	}
 
-	return hexutil.Encode(signedHash), nil
+	return hexutil.Encode(signed), nil
 }
 
 func getHash(identity, signer, destination common.Address, value *big.Int, data []byte, nonce *big.Int, chainID *big.Int) ([]byte, error) {

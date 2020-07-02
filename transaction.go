@@ -52,6 +52,17 @@ func (t *Transactions) Show(txHashOrTrackingID string) (interface{}, error) {
 	return result, nil
 }
 
+func (t *Transactions) List() (interface{}, error) {
+	var result interface{}
+
+	path := fmt.Sprintf("ethereum/%s/transactions", t.client.network)
+	if _, err := t.client.get(path, nil, &result); err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
 func (t Transaction) validateFields() error {
 	if !common.IsHexAddress(t.From) {
 		return errors.New("invalid 'from' address")

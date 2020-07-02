@@ -12,7 +12,7 @@ import (
 var (
 	showReceiptCmd = &cobra.Command{
 		Use:   "receipt",
-		Short: "Get the transaction receipt for the given transaction hash",
+		Short: "List the transaction receipt for the given transaction hash",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("missing transaction hash")

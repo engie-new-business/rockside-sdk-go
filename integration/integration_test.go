@@ -238,7 +238,7 @@ func TestRockside(t *testing.T) {
 			//Need to wait for contract deployment's transaction to be mined
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
-			t.Run("Get relay params", func(t *testing.T) {
+			t.Run("List relay params", func(t *testing.T) {
 				resp, err := client.Forwarder.GetRelayParams(forwarder.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
@@ -249,7 +249,7 @@ func TestRockside(t *testing.T) {
 				}
 			})
 
-			t.Run("Relay transaction", func(t *testing.T) {
+			t.Run("Forward transaction", func(t *testing.T) {
 				params, err := client.Forwarder.GetRelayParams(forwarder.Address, fromAddress.String())
 				if err != nil {
 					t.Fatal(err)
@@ -273,7 +273,7 @@ func TestRockside(t *testing.T) {
 					},
 				}
 
-				resp, err := client.Forwarder.Relay(forwarder.Address, request)
+				resp, err := client.Forwarder.Forward(forwarder.Address, request)
 				if err != nil {
 					t.Fatal(err)
 				}
