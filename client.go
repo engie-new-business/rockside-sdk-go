@@ -65,11 +65,11 @@ type Client struct {
 
 	RPCClient *RPCClient
 
-	EOA         *EOA
-	Identities  *Identities
-	Transaction *Transactions
-	Tokens      *Tokens
-	Forwarder   *Forwarder
+	EOA          *EOA
+	SmartWallets *SmartWallets
+	Transaction  *Transactions
+	Tokens       *Tokens
+	Forwarder    *Forwarder
 }
 
 const defaultRocksideURL = "https://api.rockside.io"
@@ -149,7 +149,7 @@ func newClient(authenticatedHTTPClient *http.Client, net Network, baseURL string
 	}
 
 	c.EOA = &EOA{c}
-	c.Identities = &Identities{c}
+	c.SmartWallets = &SmartWallets{c}
 	c.Transaction = &Transactions{c}
 	c.Tokens = &Tokens{c}
 	c.Forwarder = &Forwarder{c}

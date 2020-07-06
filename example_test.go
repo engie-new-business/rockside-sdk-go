@@ -17,11 +17,11 @@ func ExampleNewClientFromAPIKey() {
 		panic(err)
 	}
 
-	identities, err := rocksideAPIclient.Identities.List()
+	smartWallets, err := rocksideAPIclient.SmartWallets.List()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(identities)
+	fmt.Println(smartWallets)
 }
 
 func ExampleNewClientFromToken() {
@@ -30,11 +30,11 @@ func ExampleNewClientFromToken() {
 		panic(err)
 	}
 
-	identities, err := rocksideAPIclient.Identities.List()
+	smartWallets, err := rocksideAPIclient.SmartWallets.List()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(identities)
+	fmt.Println(smartWallets)
 }
 
 func ExampleRPCClient() {
@@ -54,14 +54,14 @@ func ExampleRPCClient() {
 	fmt.Println(balance)
 }
 
-func ExampleClient_DeployContractWithIdentity() {
-	identities, err := rocksideClient.Identities.List()
+func ExampleClient_DeployContractWithSmartWallet() {
+	smartWallets, err := rocksideClient.SmartWallets.List()
 	if err != nil {
 		panic(err)
 	}
 
 	var contractCode, jsonABI string
-	txHash, err := rocksideClient.DeployContractWithIdentity(identities[0], contractCode, jsonABI)
+	txHash, err := rocksideClient.DeployContractWithSmartWallet(smartWallets[0], contractCode, jsonABI)
 	if err != nil {
 		panic(err)
 	}

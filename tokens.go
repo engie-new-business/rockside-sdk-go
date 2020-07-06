@@ -2,20 +2,16 @@ package rockside
 
 type Tokens endpoint
 
-type CreateTokenResponse struct {
-	Token string `json:"token"`
-}
-
-func (i *Tokens) Create(domain string, contracts []string) (CreateTokenResponse, error) {
+func (i *Tokens) Create(domain string, contracts []string) (tokenResponse, error) {
 	return i.createRequest(domain, "", contracts)
 }
 
-func (i *Tokens) CreateForEndUser(domain string, endUserID string, contracts []string) (CreateTokenResponse, error) {
+func (i *Tokens) CreateForEndUser(domain string, endUserID string, contracts []string) (tokenResponse, error) {
 	return i.createRequest(domain, endUserID, contracts)
 }
 
-func (i *Tokens) createRequest(origin string, endUserID string, contracts []string) (CreateTokenResponse, error) {
-	var result CreateTokenResponse
+func (i *Tokens) createRequest(origin string, endUserID string, contracts []string) (tokenResponse, error) {
+	var result tokenResponse
 
 	req := struct {
 		Origin    string   `json:"origin"`

@@ -14,7 +14,7 @@ var (
 	envRocksideAPIURL      = os.Getenv("ROCKSIDE_API_URL")
 
 	rocksideTokenOrigin, rocksideURLFlag                  string
-	privateKeyFlag, identityToDeployContractFlag          string
+	privateKeyFlag, smartWalletToDeployContractFlag       string
 	testnetFlag, verboseFlag                              bool
 	printContractABIFlag, printContractRuntimeBinFlag     bool
 	compileContractOnlyFlag, printContractCreationBinFlag bool
@@ -35,16 +35,16 @@ func init() {
 	forwarderCmd.AddCommand(getNonceCmd, signCmd, relayCmd)
 	transactionCmd.AddCommand(sentTxCmd, showTxCmd)
 	eoaCmd.AddCommand(listEOACmd, createEOACmd)
-	identitiesCmd.AddCommand(listIdentitiesCmd, createIdentitiesCmd)
+	smartWalletsCmd.AddCommand(listSmartWalletsCmd, createSmartWalletCmd)
 	tokensCmd.AddCommand(createTokenCmd)
 
-	deployContractCmd.PersistentFlags().StringVar(&identityToDeployContractFlag, "identity-address", "", "Address of Rockside identity to use as 'from' when deploying contract")
+	deployContractCmd.PersistentFlags().StringVar(&smartWalletToDeployContractFlag, "smartwallet-address", "", "Address of Rockside smart wallet to use as 'from' when deploying contract")
 	deployContractCmd.PersistentFlags().BoolVar(&printContractABIFlag, "print-abi", false, "Compile, print contract abi and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&printContractRuntimeBinFlag, "print-runtime-bin", false, "Compile, print contract runtime bytecode and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&printContractCreationBinFlag, "print-creation-bin", false, "Compile, print contract creation bytecode and exit")
 	deployContractCmd.PersistentFlags().BoolVar(&compileContractOnlyFlag, "compile-only", false, "Compile without deploying and exit")
 
-	rootCmd.AddCommand(eoaCmd, identitiesCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd, tokensCmd)
+	rootCmd.AddCommand(eoaCmd, smartWalletsCmd, transactionCmd, deployContractCmd, rpcCmd, showReceiptCmd, tokensCmd)
 }
 
 func RocksideClient() *rockside.Client {

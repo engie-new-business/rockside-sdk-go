@@ -14,17 +14,6 @@ import (
 
 type Forwarder endpoint
 
-type CreateForwarderResponse struct {
-	Address         string `json:"address"`
-	TransactionHash string `json:"transaction_hash"`
-	TrackingID      string `json:"tracking_id"`
-}
-
-type RelayParamsResponse struct {
-	Nonce     string            `json:"nonce"`
-	GasPrices map[string]string `json:"gas_prices"`
-}
-
 type RelayExecuteTxData struct {
 	Signer string `json:"signer"`
 	To     string `json:"to"`
@@ -46,12 +35,12 @@ type RelayTxResponse struct {
 	TrackingID      string `json:"tracking_id"`
 }
 
-func (e *Forwarder) Create(owner string) (CreateForwarderResponse, error) {
+func (e *Forwarder) Create(owner string) (ContractCreationResponse, error) {
 	req := struct {
 		Owner string `json:"owner"`
 	}{owner}
 
-	var result CreateForwarderResponse
+	var result ContractCreationResponse
 	path := fmt.Sprintf("ethereum/%s/forwarders", e.client.network)
 	if _, err := e.client.post(path, req, &result); err != nil {
 		return result, err
@@ -70,12 +59,12 @@ func (e *Forwarder) Get() ([]string, error) {
 	return result, nil
 }
 
-func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, channels ...string) (RelayParamsResponse, error) {
+func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, channels ...string) (paramsResponse, error) {
 	channel := "0"
 	if len(channels) > 0 {
 		channel = channels[0]
 	}
-	var result RelayParamsResponse
+	var result paramsResponse
 
 	path := fmt.Sprintf("ethereum/%s/forwarders/%s/relayParams", e.client.network, forwarderAddress)
 	req := struct {
@@ -89,13 +78,13 @@ func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, chan
 
 	channelNonce, isValidNonce := new(big.Int).SetString(result.Nonce, 10)
 	if !isValidNonce {
-		return RelayParamsResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
+		return paramsResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
 	}
 	channelBig, isValidChannel := new(big.Int).SetString(channel, 10)
 	if !isValidChannel {
-		return RelayParamsResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
+		return paramsResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
 	}
-	return RelayParamsResponse{
+	return paramsResponse{
 		Nonce: new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String(),
 	}, nil
 }
@@ -155,7 +144,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, contract, signer, destination, v
 	return hexutil.Encode(signedHash), nil
 }
 
-func getHash(identity, signer, destination common.Address, value *big.Int, data []byte, nonce *big.Int, chainID *big.Int) ([]byte, error) {
+func getHash(smartWallet, signer, destination common.Address, value *big.Int, data []byte, nonce *big.Int, chainID *big.Int) ([]byte, error) {
 	EIP712DomainType := []gethSigner.Type{
 		{Name: "verifyingContract", Type: "address"},
 		{Name: "chainId", Type: "uint256"},
@@ -175,7 +164,7 @@ func getHash(identity, signer, destination common.Address, value *big.Int, data 
 	}
 
 	domainData := gethSigner.TypedDataDomain{
-		VerifyingContract: identity.String(),
+		VerifyingContract: smartWallet.String(),
 		ChainId:           math.NewHexOrDecimal256(chainID.Int64()),
 	}
 

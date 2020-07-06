@@ -11,7 +11,6 @@ import (
 type Transactions endpoint
 
 type Transaction struct {
-	Relayer  string `json:"relayer,omitempty"`
 	From     string `json:"from,omitempty"`
 	To       string `json:"to,omitempty"`
 	Value    string `json:"value,omitempty"`
@@ -21,13 +20,8 @@ type Transaction struct {
 	GasPrice string `json:"gasprice,omitempty"`
 }
 
-type SendTxResponse struct {
-	TransactionHash string `json:"transaction_hash"`
-	TrackingID      string `json:"tracking_id"`
-}
-
-func (t *Transactions) Send(transaction Transaction) (SendTxResponse, error) {
-	var result SendTxResponse
+func (t *Transactions) Send(transaction Transaction) (ContractCreationResponse, error) {
+	var result ContractCreationResponse
 
 	if err := transaction.validateFields(); err != nil {
 		return result, err

@@ -29,7 +29,7 @@ func TestRockside(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Run("Identities", func(t *testing.T) {
+	t.Run("SmartWallets", func(t *testing.T) {
 		t.Parallel()
 
 		t.Run("create", func(t *testing.T) {
@@ -43,21 +43,21 @@ func TestRockside(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			identity, err := client.Identities.Create(eoa.Address, forwarder.Address)
+			smartWallet, err := client.SmartWallets.Create(eoa.Address, forwarder.Address)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if got, want := len(identity.Address), 42; got != want {
+			if got, want := len(smartWallet.Address), 42; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
-			if got, want := len(identity.TransactionHash), 66; got != want {
+			if got, want := len(smartWallet.TransactionHash), 66; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 		})
 
 		t.Run("listing", func(t *testing.T) {
-			listing, err := client.Identities.List()
+			listing, err := client.SmartWallets.List()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -77,12 +77,12 @@ func TestRockside(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			created, err := client.Identities.Create(eoa.Address, forwarder.Address)
+			created, err := client.SmartWallets.Create(eoa.Address, forwarder.Address)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			listing, err = client.Identities.List()
+			listing, err = client.SmartWallets.List()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -107,7 +107,7 @@ func TestRockside(t *testing.T) {
 	t.Run("Transaction", func(t *testing.T) {
 		t.Parallel()
 
-		t.Run("Send transaction from identity", func(t *testing.T) {
+		t.Run("Send transaction from smart wallet", func(t *testing.T) {
 			eoa, err := client.EOA.Create()
 			if err != nil {
 				t.Fatal(err)
@@ -118,7 +118,7 @@ func TestRockside(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			identity, err := client.Identities.Create(eoa.Address, forwarder.Address)
+			smartWallet, err := client.SmartWallets.Create(eoa.Address, forwarder.Address)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -126,7 +126,7 @@ func TestRockside(t *testing.T) {
 			//Need to wait for contract deployment's transaction to be mined
 			time.Sleep(time.Duration(blockWaitTime) * time.Second)
 
-			tx := rockside.Transaction{From: identity.Address, To: identity.Address, Value: "0x0"}
+			tx := rockside.Transaction{From: smartWallet.Address, To: smartWallet.Address, Value: "0x0"}
 			txResponse, err := client.Transaction.Send(tx)
 			if err != nil {
 				t.Fatal(err)
@@ -223,15 +223,15 @@ func TestRockside(t *testing.T) {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 
-			identity, err := client.Identities.Create(fromAddress.String(), forwarder.Address)
+			smartWallet, err := client.SmartWallets.Create(fromAddress.String(), forwarder.Address)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if got, want := len(identity.Address), 42; got != want {
+			if got, want := len(smartWallet.Address), 42; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
-			if got, want := len(identity.TransactionHash), 66; got != want {
+			if got, want := len(smartWallet.TransactionHash), 66; got != want {
 				t.Fatalf("got %v, want %v", got, want)
 			}
 
@@ -254,13 +254,13 @@ func TestRockside(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				signature, err := client.Forwarder.SignTxParams(privateKeyString, identity.Address, fromAddress.String(), "0x0000000000000000000000000000000000000000", "0", "", params.Nonce)
+				signature, err := client.Forwarder.SignTxParams(privateKeyString, smartWallet.Address, fromAddress.String(), "0x0000000000000000000000000000000000000000", "0", "", params.Nonce)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				request := rockside.RelayExecuteTxRequest{
-					DestinationContract: identity.Address,
+					DestinationContract: smartWallet.Address,
 					Speed:               "standard",
 					GasPriceLimit:       "30000000000",
 					Signature:           signature,

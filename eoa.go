@@ -4,12 +4,8 @@ import "fmt"
 
 type EOA endpoint
 
-type createEOAResponse struct {
-	Address string `json:"address"`
-}
-
-func (e *EOA) Create() (createEOAResponse, error) {
-	var result createEOAResponse
+func (e *EOA) Create() (addressResponse, error) {
+	var result addressResponse
 
 	if _, err := e.client.post("ethereum/eoa", nil, &result); err != nil {
 		return result, err

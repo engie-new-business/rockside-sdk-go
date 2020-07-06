@@ -16,7 +16,7 @@ var (
 	deployContractCmd = &cobra.Command{
 		Use:   "deploy-contract",
 		Short: "Compile and deploy an Ethereum contract",
-		Long:  "Given the filepath of a .sol contract (default .sol file in current dir), it will compile and deploy it using your Rockside identity",
+		Long:  "Given the filepath of a .sol contract (default .sol file in current dir), it will compile and deploy it using your Rockside smart wallet",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var solFilepath string
 
@@ -83,17 +83,17 @@ var (
 				os.Exit(0)
 			}
 
-			identity := identityToDeployContractFlag
-			if identity == "" {
-				identities, err := RocksideClient().Identities.List()
+			smartWallet := smartWalletToDeployContractFlag
+			if smartWallet == "" {
+				smartWallets, err := RocksideClient().SmartWallets.List()
 				if err != nil {
-					return fmt.Errorf("cannot list identities: %s", err)
+					return fmt.Errorf("cannot list smart wallets: %s", err)
 				}
-				if len(identities) == 0 {
-					return errors.New("no Rockside identities found")
+				if len(smartWallets) == 0 {
+					return errors.New("no Rockside smart wallet found")
 				}
 
-				identity = identities[len(identities)-1]
+				smartWallet = smartWallets[len(smartWallets)-1]
 			}
 
 			b, err := json.Marshal(contract.Info.AbiDefinition)
@@ -101,9 +101,9 @@ var (
 				return fmt.Errorf("cannot marshal ABI JSON definition: %s", err)
 			}
 
-			log.Printf("deploying contract through Rockside identity %s", identity)
+			log.Printf("deploying contract through Rockside smartWallet %s", smartWallet)
 
-			tx, err := RocksideClient().DeployContractWithIdentity(identity, contract.Code, string(b))
+			tx, err := RocksideClient().DeployContractWithSmartWallet(smartWallet, contract.Code, string(b))
 			if err != nil {
 				return fmt.Errorf("cannot deploy contract: %s (txhash=%s)", err, tx)
 			}

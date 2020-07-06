@@ -45,7 +45,7 @@ func (r *RPCClient) SendRocksideTransaction(tx Transaction) (string, error) {
 	return r.sendTransaction(tx)
 }
 
-func (r *RPCClient) SendTransactionFromIdentity(tx Transaction) (string, error) {
+func (r *RPCClient) SendTransactionFromSmartWallet(tx Transaction) (string, error) {
 	accounts, err := r.EthAccounts()
 	if err != nil {
 		return "", nil
@@ -58,7 +58,7 @@ func (r *RPCClient) SendTransactionFromIdentity(tx Transaction) (string, error) 
 		}
 	}
 	if !found {
-		return "", fmt.Errorf("transaction 'from' address '%s' is not one of your existing Rockside identities", tx.From)
+		return "", fmt.Errorf("transaction 'from' address '%s' is not one of your existing Rockside smart wallets", tx.From)
 	}
 
 	return r.sendTransaction(tx)

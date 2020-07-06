@@ -32,7 +32,7 @@ Then to use commands export your API key:
 
 ```sh
 export ROCKSIDE_API_KEY=...
-rockside --tesnet --verbose identities ls
+rockside --tesnet --verbose smartwallets ls
 ```
 
 For instance you can deploy a contract with:
@@ -55,8 +55,8 @@ rockside transaction show 01B7J50J5N7PEFMCY181N32938
 Other useful commands:
 
 ```console
-# List my identities
-rockside --testnet identities ls
+# List my smart wallets
+rockside --testnet smartwallets ls
 
 # Show a transaction receipt from a transaction hash
 rockside --testnet receipt 0x97dfce42248a3f67f5a0660fab117b0ed7cb57af799bdda8854eca5ae5a98e28

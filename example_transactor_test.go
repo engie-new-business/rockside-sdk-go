@@ -8,10 +8,10 @@ import (
 )
 
 func Example_gaslessContractTransactor() {
-	rocksideIdentityAddress := common.HexToAddress("my_rockside_identity_hex_contract_address")
+	rocksideSmartWalletAddress := common.HexToAddress("my_rockside_smartwallet_hex_contract_address")
 	contractAddress := common.HexToAddress("my_contract_hex_address")
 
-	rocksideTransactor := rockside.NewTransactor(rocksideIdentityAddress, rocksideClient)
+	rocksideTransactor := rockside.NewTransactor(rocksideSmartWalletAddress, rocksideClient)
 
 	// NewContractTransactor is typically in your contract binding GO file which was generated via `abigen`
 	contract, err := NewContractTransactor(contractAddress, rocksideTransactor)

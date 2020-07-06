@@ -83,40 +83,39 @@ var (
 )
 
 var (
-	identitiesCmd = &cobra.Command{
-		Use:   "identities",
-		Short: "Manage identities",
+	smartWalletsCmd = &cobra.Command{
+		Use:   "smartwallets",
+		Short: "Manage smart wallets",
 	}
 
-	listIdentitiesCmd = &cobra.Command{
+	listSmartWalletsCmd = &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "List identities",
-		Example: "list identities ropsten",
+		Short:   "List smart wallets",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			identitiesList, err := RocksideClient().Identities.List()
+			smartWallets, err := RocksideClient().SmartWallets.List()
 			if err != nil {
 				return err
 			}
 
-			return printJSON(identitiesList)
+			return printJSON(smartWallets)
 		},
 	}
 
-	createIdentitiesCmd = &cobra.Command{
+	createSmartWalletCmd = &cobra.Command{
 		Use:   "deploy",
-		Short: "deploy a relayable identity given the account address and forwarder address",
+		Short: "deploy a smart wallet given the account address and forwarder address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
 				return errors.New("missing public address of the account and/or forwarder address")
 			}
 
-			identity, err := RocksideClient().Identities.Create(args[0], args[1])
+			smartWallet, err := RocksideClient().SmartWallets.Create(args[0], args[1])
 			if err != nil {
 				return err
 			}
 
-			return printJSON(identity)
+			return printJSON(smartWallet)
 		},
 	}
 )
@@ -146,7 +145,7 @@ var (
 
 	getNonceCmd = &cobra.Command{
 		Use:   "nonce",
-		Short: "get nonce of a relayable identity",
+		Short: "get nonce of a smart wallet",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
 				return errors.New("missing contract address as first param and account address as second param")

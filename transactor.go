@@ -21,13 +21,6 @@ func TransactOpts() *bind.TransactOpts {
 	return &bind.TransactOpts{Signer: noopSigner()}
 }
 
-func TransactOptsWithoutReward() *bind.TransactOpts {
-	return &bind.TransactOpts{
-		Signer:   noopSigner(),
-		GasPrice: big.NewInt(0),
-	}
-}
-
 func noopSigner() bind.SignerFn {
 	return func(s types.Signer, c common.Address, t *types.Transaction) (*types.Transaction, error) {
 		return t, nil
@@ -35,17 +28,17 @@ func noopSigner() bind.SignerFn {
 }
 
 type Transactor struct {
-	client           *Client
-	rocksideIdentity common.Address
-	mu               sync.RWMutex
-	Transaction      map[common.Hash]string
+	client              *Client
+	rocksideSmartWallet common.Address
+	mu                  sync.RWMutex
+	Transaction         map[common.Hash]string
 }
 
-func NewTransactor(rocksideIdentity common.Address, client *Client) *Transactor {
+func NewTransactor(rocksideSmartWallet common.Address, client *Client) *Transactor {
 	return &Transactor{
-		client:           client,
-		rocksideIdentity: rocksideIdentity,
-		Transaction:      make(map[common.Hash]string),
+		client:              client,
+		rocksideSmartWallet: rocksideSmartWallet,
+		Transaction:         make(map[common.Hash]string),
 	}
 }
 
@@ -75,7 +68,7 @@ func (t *Transactor) EstimateGas(ctx context.Context, call ethereum.CallMsg) (ga
 
 func (t *Transactor) SendTransaction(ctx context.Context, tx *types.Transaction) error {
 	resp, err := t.client.Transaction.Send(Transaction{
-		From:     t.rocksideIdentity.String(),
+		From:     t.rocksideSmartWallet.String(),
 		To:       tx.To().String(),
 		Value:    hexutil.EncodeBig(tx.Value()),
 		Data:     hexutil.Encode(tx.Data()),

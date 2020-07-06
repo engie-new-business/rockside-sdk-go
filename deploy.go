@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-func (c *Client) DeployContractWithIdentity(rocksideIdentityAddr, code, jsonABI string) (string, error) {
-	if _, err := hexutil.Decode(rocksideIdentityAddr); err != nil {
-		return "", fmt.Errorf("invalid identity address: %s", err)
+func (c *Client) DeployContractWithSmartWallet(rocksideSmartWalletAddr, code, jsonABI string) (string, error) {
+	if _, err := hexutil.Decode(rocksideSmartWalletAddr); err != nil {
+		return "", fmt.Errorf("invalid smart wallet address: %s", err)
 	}
 
 	parsedABI, err := abi.JSON(strings.NewReader(jsonABI))
@@ -27,7 +27,7 @@ func (c *Client) DeployContractWithIdentity(rocksideIdentityAddr, code, jsonABI 
 	var data []byte
 	data = append(common.FromHex(code), input...)
 	resp, err := c.Transaction.Send(Transaction{
-		From: rocksideIdentityAddr,
+		From: rocksideSmartWalletAddr,
 		Data: fmt.Sprintf("0x%x", data),
 	})
 
