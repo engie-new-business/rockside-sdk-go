@@ -13,7 +13,7 @@ import (
 
 type Forwarder endpoint
 
-type RelayExecuteTxData struct {
+type RelayExecuteTxMessage struct {
 	Signer string `json:"signer"`
 	To     string `json:"to"`
 	Data   string `json:"data"`
@@ -21,10 +21,10 @@ type RelayExecuteTxData struct {
 }
 
 type RelayExecuteTxRequest struct {
-	Speed         string             `json:"speed"`
-	GasPriceLimit string             `json:"gas_price_limit"`
-	Data          RelayExecuteTxData `json:"data"`
-	Signature     string             `json:"signature"`
+	Speed         string                `json:"speed"`
+	GasPriceLimit string                `json:"gas_price_limit"`
+	Message       RelayExecuteTxMessage `json:"message"`
+	Signature     string                `json:"signature"`
 }
 
 type RelayTxResponse struct {
