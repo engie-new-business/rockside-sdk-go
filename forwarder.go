@@ -1,7 +1,6 @@
 package rockside
 
 import (
-	"errors"
 	"fmt"
 	"math/big"
 
@@ -17,17 +16,15 @@ type Forwarder endpoint
 type RelayExecuteTxData struct {
 	Signer string `json:"signer"`
 	To     string `json:"to"`
-	Value  string `json:"value"`
 	Data   string `json:"data"`
 	Nonce  string `json:"nonce"`
 }
 
 type RelayExecuteTxRequest struct {
-	DestinationContract string             `json:"destination_contract"`
-	Speed               string             `json:"speed"`
-	GasPriceLimit       string             `json:"gas_price_limit"`
-	Data                RelayExecuteTxData `json:"data"`
-	Signature           string             `json:"signature"`
+	Speed         string             `json:"speed"`
+	GasPriceLimit string             `json:"gas_price_limit"`
+	Data          RelayExecuteTxData `json:"data"`
+	Signature     string             `json:"signature"`
 }
 
 type RelayTxResponse struct {
@@ -104,19 +101,14 @@ func (e *Forwarder) Relay(forwarderAddress string, request RelayExecuteTxRequest
 	return result, nil
 }
 
-func (e *Forwarder) SignTxParams(privateKeyStr, contract, signer, destination, value, data, nonce string) (string, error) {
+func (e *Forwarder) SignTxParams(privateKeyStr, forwarder, signer, destination, data, nonce string) (string, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyStr)
 	if err != nil {
 		return "", err
 	}
 
-	valueInt, ok := math.ParseBig256(value)
-	if !ok {
-		return "", errors.New("error with provided value")
-	}
-
 	if nonce == "" {
-		paramsResponse, err := e.GetRelayParams(contract, signer)
+		paramsResponse, err := e.GetRelayParams(forwarder, signer)
 		if err != nil {
 			return "", err
 		}
@@ -131,7 +123,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, contract, signer, destination, v
 
 	network := e.client.CurrentNetwork()
 
-	argsHash, err := getHash(common.HexToAddress(contract), common.HexToAddress(signer), common.HexToAddress(destination), valueInt, common.FromHex(data), nonceBig, network.ChainID())
+	argsHash, err := getHash(common.HexToAddress(destination), common.HexToAddress(signer), common.HexToAddress(destination), common.FromHex(data), nonceBig, common.HexToAddress(forwarder), network.ChainID())
 	if err != nil {
 		return "", err
 	}
@@ -144,7 +136,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, contract, signer, destination, v
 	return hexutil.Encode(signedHash), nil
 }
 
-func getHash(smartWallet, signer, destination common.Address, value *big.Int, data []byte, nonce *big.Int, chainID *big.Int) ([]byte, error) {
+func getHash(smartWallet, signer, destination common.Address, data []byte, nonce *big.Int, forwarder common.Address, chainID *big.Int) ([]byte, error) {
 	EIP712DomainType := []gethSigner.Type{
 		{Name: "verifyingContract", Type: "address"},
 		{Name: "chainId", Type: "uint256"},
@@ -153,7 +145,6 @@ func getHash(smartWallet, signer, destination common.Address, value *big.Int, da
 	txMessageType := []gethSigner.Type{
 		{Name: "signer", Type: "address"},
 		{Name: "to", Type: "address"},
-		{Name: "value", Type: "uint256"},
 		{Name: "data", Type: "bytes"},
 		{Name: "nonce", Type: "uint256"},
 	}
@@ -164,14 +155,13 @@ func getHash(smartWallet, signer, destination common.Address, value *big.Int, da
 	}
 
 	domainData := gethSigner.TypedDataDomain{
-		VerifyingContract: smartWallet.String(),
+		VerifyingContract: forwarder.String(),
 		ChainId:           math.NewHexOrDecimal256(chainID.Int64()),
 	}
 
 	messageData := gethSigner.TypedDataMessage{
 		"signer": signer.String(),
 		"to":     destination.String(),
-		"value":  value.String(),
 		"data":   data,
 		"nonce":  nonce.String(),
 	}
