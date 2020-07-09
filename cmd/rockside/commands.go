@@ -177,7 +177,7 @@ var (
 				return err
 			}
 
-			signResponse, err := RocksideClient().Forwarder.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Value, tx.Data, tx.Nonce)
+			signResponse, err := RocksideClient().Forwarder.SignTxParams(privateKeyFlag, contractAddress, tx.From, tx.To, tx.Data, tx.Nonce)
 
 			if err != nil {
 				return err
