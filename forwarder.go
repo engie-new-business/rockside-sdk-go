@@ -81,9 +81,8 @@ func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, chan
 	if !isValidChannel {
 		return paramsResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
 	}
-	return paramsResponse{
-		Nonce: new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String(),
-	}, nil
+	result.Nonce = new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String()
+	return result, nil
 }
 
 func (e *Forwarder) Relay(forwarderAddress string, request RelayExecuteTxRequest) (RelayTxResponse, error) {
