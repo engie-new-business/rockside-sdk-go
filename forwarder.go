@@ -25,6 +25,7 @@ type RelayExecuteTxRequest struct {
 	GasPriceLimit string                `json:"gas_price_limit"`
 	Message       RelayExecuteTxMessage `json:"message"`
 	Signature     string                `json:"signature"`
+	Gas           string                `json:"gas"`
 }
 
 type RelayTxResponse struct {
