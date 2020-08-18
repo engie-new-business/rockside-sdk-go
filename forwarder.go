@@ -123,7 +123,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, forwarder, signer, destination, 
 
 	network := e.client.CurrentNetwork()
 
-	argsHash, err := getHash(common.HexToAddress(destination), common.HexToAddress(signer), common.HexToAddress(destination), common.FromHex(data), nonceBig, common.HexToAddress(forwarder), network.ChainID())
+	argsHash, err := GetHash(common.HexToAddress(signer), common.HexToAddress(destination), common.FromHex(data), nonceBig, common.HexToAddress(forwarder), network.ChainID())
 	if err != nil {
 		return "", err
 	}
@@ -136,7 +136,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, forwarder, signer, destination, 
 	return hexutil.Encode(signedHash), nil
 }
 
-func getHash(smartWallet, signer, destination common.Address, data []byte, nonce *big.Int, forwarder common.Address, chainID *big.Int) ([]byte, error) {
+func GetHash(signer, destination common.Address, data []byte, nonce *big.Int, forwarder common.Address, chainID *big.Int) ([]byte, error) {
 	EIP712DomainType := []gethSigner.Type{
 		{Name: "verifyingContract", Type: "address"},
 		{Name: "chainId", Type: "uint256"},
