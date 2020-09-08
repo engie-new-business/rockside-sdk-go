@@ -70,7 +70,7 @@ type Client struct {
 	Transaction  *Transactions
 	Tokens       *Tokens
 	Forwarder    *Forwarder
-	Relay    	 *Relay
+	Relay        *Relay
 }
 
 const defaultRocksideURL = "https://api.rockside.io"

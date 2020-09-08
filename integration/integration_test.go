@@ -192,16 +192,12 @@ func TestRockside(t *testing.T) {
 	})
 
 	t.Run("Direct Relay", func(t *testing.T) {
-
 		t.Run("Get relay params", func(t *testing.T) {
 			_, err := client.Relay.GetParams(os.Getenv("GNOSIS_ADDRESS"), os.Getenv("GNOSIS_OWNER"))
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				
+			if err != nil {
+				t.Fatal(err)
+			}
 		})
-	
 	})
 
 	t.Run("Forwarder contract", func(t *testing.T) {
