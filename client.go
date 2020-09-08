@@ -70,6 +70,7 @@ type Client struct {
 	Transaction  *Transactions
 	Tokens       *Tokens
 	Forwarder    *Forwarder
+	Relay        *Relay
 }
 
 const defaultRocksideURL = "https://api.rockside.io"
@@ -153,6 +154,7 @@ func newClient(authenticatedHTTPClient *http.Client, net Network, baseURL string
 	c.Transaction = &Transactions{c}
 	c.Tokens = &Tokens{c}
 	c.Forwarder = &Forwarder{c}
+	c.Relay = &Relay{c}
 
 	return c, nil
 }
