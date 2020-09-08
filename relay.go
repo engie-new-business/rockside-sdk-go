@@ -11,7 +11,7 @@ type RelayTx struct {
 	Speed string `json:"speed"`
 }
 
-func (e *Relay) GetParams(destination string, account string) (RelayParamsResponse, error) {
+func (e *Relay) GetParams(destination string) (RelayParamsResponse, error) {
 	var result RelayParamsResponse
 	path := fmt.Sprintf("ethereum/%s/relay/%s/params", e.client.network, destination)
 	_, err := e.client.get(path, nil, &result)

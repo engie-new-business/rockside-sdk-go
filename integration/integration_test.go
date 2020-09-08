@@ -193,10 +193,19 @@ func TestRockside(t *testing.T) {
 
 	t.Run("Direct Relay", func(t *testing.T) {
 		t.Run("Get relay params", func(t *testing.T) {
-			_, err := client.Relay.GetParams(os.Getenv("GNOSIS_ADDRESS"), os.Getenv("GNOSIS_OWNER"))
-			if err != nil {
-				t.Fatal(err)
-			}
+		resp, err := client.Relay.GetParams(os.Getenv("GNOSIS_ADDRESS"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got, want := (resp.Speeds["standard"]["gas_price"] == "0"), false; got != want {
+				t.Fatalf("got %v, want %v", got, want)
+		}
+
+		if got, want := resp.Speeds["standard"]["relayer"], "0x618E5C42ECdc63aD84c95D714aFAdA52602Bbac3";  got != want {
+			t.Fatalf("got %v, want %v", got, want)
+	}
+
 		})
 	})
 
