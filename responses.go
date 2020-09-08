@@ -19,6 +19,10 @@ type paramsResponse struct {
 	GasPrices map[string]string `json:"gas_prices"`
 }
 
+type RelayParamsResponse struct {
+	speeds map[string] map[string]string `json:"speeds"`
+}
+
 type tokenResponse struct {
 	Token string `json:"token"`
 }
