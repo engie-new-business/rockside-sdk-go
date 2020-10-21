@@ -74,15 +74,6 @@ func (e *Forwarder) GetRelayParams(forwarderAddress string, account string, chan
 		return result, err
 	}
 
-	channelNonce, isValidNonce := new(big.Int).SetString(result.Nonce, 10)
-	if !isValidNonce {
-		return paramsResponse{}, fmt.Errorf("nonce is not a valid number [%s]", result.Nonce)
-	}
-	channelBig, isValidChannel := new(big.Int).SetString(channel, 10)
-	if !isValidChannel {
-		return paramsResponse{}, fmt.Errorf("channel is not a valid number [%s]", channel)
-	}
-	result.Nonce = new(big.Int).Add(new(big.Int).Lsh(channelBig, 128), channelNonce).String()
 	return result, nil
 }
 
@@ -112,9 +103,7 @@ func (e *Forwarder) SignTxParams(privateKeyStr, forwarder, signer, destination, 
 		if err != nil {
 			return "", err
 		}
-		if nonce == "" {
-			nonce = paramsResponse.Nonce
-		}
+		nonce = paramsResponse.Nonce
 	}
 	nonceBig, isValidNonce := new(big.Int).SetString(nonce, 10)
 	if !isValidNonce {
